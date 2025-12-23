@@ -1,4 +1,6 @@
 import { Button } from "@/components/ui/button";
+import { useCart } from "@/hooks/use-cart";
+import { Check } from "lucide-react";
 
 interface ProductCardProps {
   id: number;
@@ -9,7 +11,20 @@ interface ProductCardProps {
   isSoldOut?: boolean;
 }
 
-const ProductCard = ({ name, price, image, pattern, isSoldOut = false }: ProductCardProps) => {
+const ProductCard = ({ id, name, price, image, pattern, isSoldOut = false }: ProductCardProps) => {
+  const { addItem, isInCart } = useCart();
+  const itemId = String(id);
+  const inCart = isInCart(itemId);
+
+  const handleAddToCart = () => {
+    addItem({
+      id: itemId,
+      title: name,
+      price: Math.round(price * 100), // convert to cents
+      image,
+    });
+  };
+
   return (
     <div className="group relative bg-card rounded-lg overflow-hidden shadow-soft hover:shadow-medium transition-all duration-300">
       {/* Image Container */}
@@ -31,9 +46,16 @@ const ProductCard = ({ name, price, image, pattern, isSoldOut = false }: Product
         {/* Quick Add Overlay */}
         {!isSoldOut && (
           <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors duration-300 flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100">
-            <Button variant="hero" size="default">
-              Add to Cart
-            </Button>
+            {inCart ? (
+              <Button variant="secondary" size="default" disabled>
+                <Check className="h-4 w-4 mr-2" />
+                In Cart
+              </Button>
+            ) : (
+              <Button variant="hero" size="default" onClick={handleAddToCart}>
+                Add to Cart
+              </Button>
+            )}
           </div>
         )}
       </div>
