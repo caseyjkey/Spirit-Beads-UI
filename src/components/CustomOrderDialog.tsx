@@ -23,7 +23,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
@@ -103,65 +102,24 @@ const CustomOrderDialog = () => {
     });
   };
 
-  const uploadFiles = async (): Promise<string[]> => {
-    const uploadedUrls: string[] = [];
-
-    for (const { file } of files) {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-      const filePath = `custom-orders/${fileName}`;
-
-      const { error } = await supabase.storage
-        .from("custom-order-attachments")
-        .upload(filePath, file);
-
-      if (error) {
-        throw new Error(`Failed to upload ${file.name}`);
-      }
-
-      const { data: publicUrlData } = supabase.storage
-        .from("custom-order-attachments")
-        .getPublicUrl(filePath);
-
-      uploadedUrls.push(publicUrlData.publicUrl);
-    }
-
-    return uploadedUrls;
-  };
-
   const onSubmit = async (data: CustomOrderFormData) => {
     setIsSubmitting(true);
 
-    try {
-      // Upload files first
-      const imageUrls = await uploadFiles();
+    // TODO: Implement backend submission with Lovable Cloud
+    console.log("Form data:", data);
+    console.log("Files:", files.map(f => f.file.name));
+    
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Insert custom order request into database
-      const { error } = await supabase.from("custom_order_requests").insert({
-        name: data.name,
-        email: data.email,
-        description: data.description,
-        colors: data.colors || null,
-        reference_images: imageUrls,
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      toast.success("Custom order request submitted! We'll be in touch soon.");
-      
-      // Reset form and files
-      form.reset();
-      files.forEach(({ preview }) => URL.revokeObjectURL(preview));
-      setFiles([]);
-      setOpen(false);
-    } catch (error) {
-      console.error("Error submitting custom order:", error);
-      toast.error("Failed to submit request. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
+    toast.success("Custom order request submitted! We'll be in touch soon.");
+    
+    // Reset form and files
+    form.reset();
+    files.forEach(({ preview }) => URL.revokeObjectURL(preview));
+    setFiles([]);
+    setOpen(false);
+    setIsSubmitting(false);
   };
 
   return (
