@@ -1,4 +1,5 @@
 import ProductCard from "./ProductCard";
+import CustomOrderDialog from "./CustomOrderDialog";
 
 import lighterCase1 from "@/assets/products/lighter-case-1.jpg";
 import lighterCase2 from "@/assets/products/lighter-case-2.jpg";
@@ -89,12 +90,7 @@ const ProductGrid = () => {
           <p className="font-body text-muted-foreground mb-4">
             Looking for a custom design or color combination?
           </p>
-          <a
-            href="#contact"
-            className="font-body text-primary font-medium hover:text-rust underline underline-offset-4 transition-colors"
-          >
-            Request a Custom Order →
-          </a>
+          <CustomOrderDialog />
         </div>
       </div>
     </section>
