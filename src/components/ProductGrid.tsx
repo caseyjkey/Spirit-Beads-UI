@@ -1,60 +1,55 @@
 import ProductCard from "./ProductCard";
 import CustomOrderDialog from "./CustomOrderDialog";
-
-import lighterCase1 from "@/assets/products/lighter-case-1.jpg";
-import lighterCase2 from "@/assets/products/lighter-case-2.jpg";
-import lighterCase3 from "@/assets/products/lighter-case-3.jpg";
-import lighterCase4 from "@/assets/products/lighter-case-4.jpg";
-import lighterCase5 from "@/assets/products/lighter-case-5.jpg";
-import lighterCase6 from "@/assets/products/lighter-case-6.jpg";
-
-const products = [
-  {
-    id: 1,
-    name: "Desert Diamond",
-    price: 45.00,
-    image: lighterCase1,
-    pattern: "Chevron Pattern",
-  },
-  {
-    id: 2,
-    name: "Turquoise Trail",
-    price: 48.00,
-    image: lighterCase2,
-    pattern: "Geometric Pattern",
-  },
-  {
-    id: 3,
-    name: "Sunburst Spirit",
-    price: 52.00,
-    image: lighterCase3,
-    pattern: "Sunburst Pattern",
-  },
-  {
-    id: 4,
-    name: "Sacred Stone",
-    price: 46.00,
-    image: lighterCase4,
-    pattern: "Diamond Pattern",
-  },
-  {
-    id: 5,
-    name: "Forest Fire",
-    price: 50.00,
-    image: lighterCase5,
-    pattern: "Mountain Pattern",
-  },
-  {
-    id: 6,
-    name: "Rainbow Ridge",
-    price: 55.00,
-    image: lighterCase6,
-    pattern: "Arrow Pattern",
-    isSoldOut: true,
-  },
-];
+import { useProducts } from "@/hooks/use-api";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const ProductGrid = () => {
+  const { products, loading, error } = useProducts();
+
+  if (loading) {
+    return (
+      <section id="collection" className="py-20 md:py-28 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12 md:mb-16">
+            <Skeleton className="h-4 w-32 mx-auto mb-4" />
+            <Skeleton className="h-12 w-64 mx-auto mb-4" />
+            <Skeleton className="h-6 w-full max-w-2xl mx-auto" />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+            {[...Array(6)].map((_, index) => (
+              <div key={index} className="space-y-4">
+                <Skeleton className="aspect-[3/4] w-full rounded-lg" />
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-6 w-full" />
+                <Skeleton className="h-6 w-20" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section id="collection" className="py-20 md:py-28 bg-background">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="font-display text-3xl md:text-4xl font-semibold text-foreground mb-4">
+            Unable to Load Products
+          </h2>
+          <p className="font-body text-lg text-muted-foreground mb-8">
+            We're having trouble loading our collection. Please try again later.
+          </p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="px-6 py-3 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </section>
+    );
+  }
   return (
     <section id="collection" className="py-20 md:py-28 bg-background">
       <div className="container mx-auto px-4">
@@ -80,7 +75,14 @@ const ProductGrid = () => {
               className="animate-fade-in-up"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <ProductCard {...product} />
+              <ProductCard 
+                id={product.id}
+                name={product.name}
+                price={product.price}
+                image={product.primary_image || '/placeholder-product.jpg'}
+                pattern={product.pattern_display}
+                isSoldOut={product.is_sold_out}
+              />
             </div>
           ))}
         </div>

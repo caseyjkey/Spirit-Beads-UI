@@ -5,7 +5,7 @@ import { Check } from "lucide-react";
 interface ProductCardProps {
   id: number;
   name: string;
-  price: number;
+  price: number | string;
   image: string;
   pattern: string;
   isSoldOut?: boolean;
@@ -20,9 +20,22 @@ const ProductCard = ({ id, name, price, image, pattern, isSoldOut = false }: Pro
     addItem({
       id: itemId,
       title: name,
-      price: Math.round(price * 100), // convert to cents
+      price: Math.round(Number(price) * 100), // convert to cents
       image,
     });
+  };
+
+  const getImageUrl = (imageSrc: string) => {
+    // If it's already a full URL, return as is
+    if (imageSrc.startsWith('http')) {
+      return imageSrc;
+    }
+    // If it's a relative path from Django media, prepend the base URL
+    if (imageSrc.startsWith('/media/')) {
+      return `https://spirit-beads.keycasey.com${imageSrc}`;
+    }
+    // Otherwise treat as local asset
+    return imageSrc;
   };
 
   return (
@@ -30,9 +43,13 @@ const ProductCard = ({ id, name, price, image, pattern, isSoldOut = false }: Pro
       {/* Image Container */}
       <div className="relative aspect-[3/4] overflow-hidden bg-secondary">
         <img
-          src={image}
+          src={getImageUrl(image)}
           alt={`${name} - ${pattern} beaded lighter case`}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          onError={(e) => {
+            // Fallback to placeholder if image fails to load
+            e.currentTarget.src = '/placeholder-product.svg';
+          }}
         />
         
         {isSoldOut && (
@@ -69,7 +86,7 @@ const ProductCard = ({ id, name, price, image, pattern, isSoldOut = false }: Pro
           {name}
         </h3>
         <p className="font-body text-lg font-semibold text-primary">
-          ${price.toFixed(2)}
+          ${Number(price).toFixed(2)}
         </p>
       </div>
     </div>

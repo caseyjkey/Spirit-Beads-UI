@@ -62,12 +62,58 @@ This project is built with:
 
 ## How can I deploy this project?
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+### PM2 Deployment
 
-## Can I connect a custom domain to my Lovable project?
+For server deployment using PM2 process manager:
 
-Yes, you can!
+#### Development Mode
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+```bash
+# Start the application in development mode
+pm2 start ecosystem.config.js
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+# View running processes
+pm2 list
+
+# View logs
+pm2 logs spirit-bead-designs
+
+# Stop the application
+pm2 stop spirit-bead-designs
+
+# Restart the application
+pm2 restart spirit-bead-designs
+```
+
+#### Production Mode
+
+```bash
+# Build the application first
+npm run build
+
+# Start in production mode
+pm2 start ecosystem.config.js --env production
+
+# Monitor the application
+pm2 monit
+
+# Save PM2 configuration (auto-start on server reboot)
+pm2 save
+pm2 startup
+```
+
+#### PM2 Management Commands
+
+```bash
+# Delete the application from PM2
+pm2 delete spirit-bead-designs
+
+# View real-time monitoring
+pm2 monit
+
+# View all logs
+pm2 logs
+
+# Reload without downtime
+pm2 reload spirit-bead-designs
+```
