@@ -30,9 +30,11 @@ const ProductCard = ({ id, name, price, image, pattern, isSoldOut = false }: Pro
     if (imageSrc.startsWith('http')) {
       return imageSrc;
     }
-    // If it's a relative path from Django media, prepend the base URL
+    // If it's a relative path from Django media, prepend the base API URL (without /api)
     if (imageSrc.startsWith('/media/')) {
-      return `https://spirit-beads.keycasey.com${imageSrc}`;
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://spirit-beads.keycasey.com/api';
+      const mediaBaseUrl = baseUrl.replace('/api', '');
+      return `${mediaBaseUrl}${imageSrc}`;
     }
     // Otherwise treat as local asset
     return imageSrc;

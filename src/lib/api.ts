@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://spirit-beads.keycasey.com/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://spirit-beads.keycasey.com/api';
 
 export interface Product {
   id: number;
