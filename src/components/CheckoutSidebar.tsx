@@ -23,6 +23,17 @@ export const CheckoutSidebar = ({ isOpen, onClose }: CheckoutSidebarProps) => {
   const [isRendered, setIsRendered] = useState(isOpen);
   const [isVisible, setIsVisible] = useState(false);
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isOpen]);
+
   // Control external overlay for nuclear debugging test
   useEffect(() => {
     const overlay = document.getElementById('checkout-overlay');
