@@ -62,9 +62,9 @@ const ProductCard = ({ id, name, price, image, pattern, isSoldOut = false }: Pro
           </div>
         )}
 
-        {/* Quick Add Overlay */}
+        {/* Quick Add Overlay - Only show on desktop hover */}
         {!isSoldOut && (
-          <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors duration-300 flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100">
+          <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors duration-300 flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100 md:block hidden">
             {inCart ? (
               <Button variant="secondary" size="default" disabled>
                 <Check className="h-4 w-4 mr-2" />
@@ -87,9 +87,26 @@ const ProductCard = ({ id, name, price, image, pattern, isSoldOut = false }: Pro
         <h3 className="font-display text-lg font-medium text-foreground mb-2">
           {name}
         </h3>
-        <p className="font-body text-lg font-semibold text-primary">
-          ${(Number(price) / 100).toFixed(2)}
-        </p>
+        <div className="flex items-center justify-between">
+          <p className="font-body text-lg font-semibold text-primary">
+            ${(Number(price) / 100).toFixed(2)}
+          </p>
+          {!isSoldOut && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleAddToCart}
+              className="border border-current hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-colors duration-300"
+              disabled={inCart}
+            >
+              {inCart ? (
+                <Check className="h-4 w-4" />
+              ) : (
+                <span className="text-xs font-medium">Add</span>
+              )}
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );

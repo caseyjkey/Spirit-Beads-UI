@@ -1,5 +1,6 @@
 import { Helmet } from "react-helmet-async";
 import Header from "@/components/Header";
+import ShippingBanner from "@/components/ShippingBanner";
 import Hero from "@/components/Hero";
 import ProductGrid from "@/components/ProductGrid";
 import AboutSection from "@/components/AboutSection";
@@ -19,6 +20,9 @@ const Index = () => {
       </Helmet>
       
       <div className="min-h-screen bg-background">
+        {/* Checkout overlay for blur effect */}
+        <div id="checkout-overlay" className="checkout-overlay" />
+        <ShippingBanner />
         <Header />
         <main>
           <Hero />

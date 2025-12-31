@@ -1,44 +1,70 @@
 import { useState, useEffect } from "react";
+import { X, ShoppingBag, Trash2, Plus, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ShoppingBag, X, Trash2 } from "lucide-react";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { useCart } from "@/hooks/use-cart";
 import { useCartPricing } from "@/hooks/use-cart-pricing";
 import { useCheckout, CheckoutError } from "@/hooks/use-checkout";
 import { Separator } from "@/components/ui/separator";
 import { QuantitySelector } from "@/components/ui/quantity-selector";
 import { CheckoutErrorDisplay } from "@/components/ui/checkout-error-display";
-import { Loader2 } from "lucide-react";
+import { TrustPillars } from "./TrustPillars";
 
-const CartSheet = () => {
+interface CheckoutSidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export const CheckoutSidebar = ({ isOpen, onClose }: CheckoutSidebarProps) => {
   const { items, removeItem, itemCount, updateQuantity } = useCart();
   const { cartItemsWithPricing, loading, error: pricingError, subtotal } = useCartPricing();
   const { checkout, isLoading, error, setError } = useCheckout();
   const [showCheckoutError, setShowCheckoutError] = useState(false);
   const [localCheckoutError, setLocalCheckoutError] = useState<CheckoutError | null>(null);
 
+  // Control external overlay for nuclear debugging test
+  useEffect(() => {
+    const overlay = document.getElementById('checkout-overlay');
+    if (overlay) {
+      if (isOpen) {
+        // Use requestAnimationFrame to ensure perfect synchronization with sidebar
+        requestAnimationFrame(() => {
+          overlay.classList.add('is-active');
+        });
+        
+        // Add click handler to overlay
+        const handleOverlayClick = (e: MouseEvent) => {
+          if (e.target === overlay) {
+            onClose();
+          }
+        };
+        overlay.addEventListener('click', handleOverlayClick);
+        
+        return () => {
+          overlay.removeEventListener('click', handleOverlayClick);
+          overlay.classList.remove('is-active');
+        };
+      } else {
+        // Use requestAnimationFrame for synchronized closing
+        requestAnimationFrame(() => {
+          overlay.classList.remove('is-active');
+        });
+      }
+    }
+  }, [isOpen, onClose]);
+
   const formatPrice = (cents: number) => {
     return `$${(cents / 100).toFixed(2)}`;
   };
 
   const getImageUrl = (imageSrc: string) => {
-    // If it's already a full URL, return as is
     if (imageSrc.startsWith('http')) {
       return imageSrc;
     }
-    // If it's a relative path from Django media, prepend the base API URL (without /api)
     if (imageSrc.startsWith('/media/')) {
       const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://spirit-beads.keycasey.com/api';
       const mediaBaseUrl = baseUrl.replace('/api', '');
       return `${mediaBaseUrl}${imageSrc}`;
     }
-    // Otherwise treat as local asset
     return imageSrc;
   };
 
@@ -48,7 +74,6 @@ const CartSheet = () => {
       setLocalCheckoutError(null);
       await checkout();
     } catch (err) {
-      // Handle CheckoutError objects
       if (err && typeof err === 'object' && 'message' in err && 'details' in err) {
         setLocalCheckoutError(err as CheckoutError);
       } else {
@@ -57,7 +82,6 @@ const CartSheet = () => {
           details: [] 
         });
       }
-      
       setShowCheckoutError(true);
     }
   };
@@ -72,38 +96,42 @@ const CartSheet = () => {
     updateQuantity(cartId, newQuantity);
   };
 
-  return (
-    <Sheet>
-      <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
-          <ShoppingBag className="h-5 w-5" />
-          {itemCount > 0 && (
-            <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-              {itemCount}
-            </span>
-          )}
-        </Button>
-      </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-md flex flex-col">
-        <SheetHeader>
-          <SheetTitle className="font-display text-xl">Your Cart</SheetTitle>
-        </SheetHeader>
+  if (!isOpen) return null;
 
+  return (
+    <>
+      {/* Checkout Sidebar */}
+      <div className="fixed right-0 top-16 md:top-20 h-[calc(100vh-4rem)] md:h-[calc(100vh-5rem)] w-[400px] bg-white shadow-2xl z-[160] flex flex-col">
+        {/* Header with Close Button */}
+        <div className="relative flex items-center justify-between p-6 border-b border-gray-200">
+          <h2 className="text-xl font-display font-semibold">Your Cart</h2>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="z-95 hover:bg-gray-100"
+          >
+            <X className="h-5 w-5" />
+          </Button>
+        </div>
+
+        {/* Cart Content */}
         {items.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center py-12">
-            <ShoppingBag className="h-16 w-16 text-muted-foreground/50 mb-4" />
-            <p className="font-body text-muted-foreground">Your cart is empty</p>
-            <p className="font-body text-sm text-muted-foreground/70 mt-1">
+            <ShoppingBag className="h-16 w-16 text-gray-400 mb-4" />
+            <p className="font-body text-gray-500">Your cart is empty</p>
+            <p className="font-body text-sm text-gray-400 mt-1">
               Add some unique pieces to get started
             </p>
           </div>
         ) : (
           <>
-            <div className="flex-1 overflow-auto py-4">
-              <div className="space-y-4">
+            {/* Product List */}
+            <div className="flex-1 overflow-auto py-4 max-h-[calc(100vh-16rem)] md:max-h-[calc(100vh-20rem)]">
+              <div className="space-y-4 px-6">
                 {cartItemsWithPricing.map((item) => (
                   <div key={item.cartId} className="flex gap-4">
-                    <div className="w-20 h-24 bg-secondary rounded-md overflow-hidden flex-shrink-0">
+                    <div className="w-20 h-24 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
                       <img
                         src={getImageUrl(item.primary_image || item.image || '/placeholder-product.jpg')}
                         alt={item.name}
@@ -114,7 +142,7 @@ const CartSheet = () => {
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-display font-medium text-foreground truncate">
+                      <h4 className="font-display font-medium text-gray-900 truncate">
                         {item.name}
                       </h4>
                       <p className="font-body text-primary font-semibold mt-1">
@@ -131,7 +159,7 @@ const CartSheet = () => {
                         </div>
                       )}
                       {item.inventory_count <= 1 && (
-                        <p className="font-body text-xs text-muted-foreground mt-2">
+                        <p className="font-body text-xs text-gray-500 mt-2">
                           Quantity: {item.quantity}
                         </p>
                       )}
@@ -140,19 +168,25 @@ const CartSheet = () => {
                       variant="ghost"
                       size="icon"
                       onClick={() => removeItem(item.cartId)}
-                      className="text-muted-foreground hover:text-destructive flex-shrink-0"
+                      className="text-gray-400 hover:text-red-500 flex-shrink-0"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 ))}
               </div>
+              
+              {/* Trust Pillars */}
+              <div className="mt-8 px-6">
+                <TrustPillars />
+              </div>
             </div>
 
-            <div className="border-t border-border pt-4 space-y-4">
+            {/* Checkout Section - Fixed at bottom */}
+            <div className="border-t border-gray-200 p-6 space-y-4 flex-shrink-0">
               {pricingError && (
-                <div className="bg-destructive/10 border border-destructive/20 rounded-md p-3">
-                  <p className="text-sm text-destructive">{pricingError}</p>
+                <div className="bg-red-50 border border-red-200 rounded-md p-3">
+                  <p className="text-sm text-red-600">{pricingError}</p>
                 </div>
               )}
               {localCheckoutError && showCheckoutError && (
@@ -162,12 +196,12 @@ const CartSheet = () => {
                 />
               )}
               <div className="flex items-center justify-between">
-                <span className="font-body text-muted-foreground">Subtotal</span>
+                <span className="font-body text-gray-600">Subtotal</span>
                 <div className="h-[1.25rem] flex items-center justify-center">
                   {loading ? (
-                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                    <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
                   ) : (
-                    <span className="font-display text-xl font-semibold text-foreground">
+                    <span className="font-display text-xl font-semibold text-gray-900">
                       {formatPrice(subtotal)}
                     </span>
                   )}
@@ -179,17 +213,22 @@ const CartSheet = () => {
                 onClick={handleCheckout}
                 disabled={isLoading}
               >
-                Checkout
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Processing...
+                  </>
+                ) : (
+                  'Checkout'
+                )}
               </Button>
-              <p className="font-body text-[0.75rem] text-center text-muted-foreground">
+              <p className="font-body text-[0.75rem] text-center text-gray-500">
                 Shipping: $5 Flat (USA) or Calculated (Int'l)
               </p>
             </div>
           </>
         )}
-      </SheetContent>
-    </Sheet>
+      </div>
+    </>
   );
 };
-
-export default CartSheet;

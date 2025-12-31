@@ -15,6 +15,7 @@ interface CartContextType {
   isInCart: (id: string) => boolean;
   clearCart: () => void;
   itemCount: number;
+  triggerBadgeAnimation: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -55,6 +56,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   });
 
+  const [badgeAnimationTrigger, setBadgeAnimationTrigger] = useState(0);
+
   useEffect(() => {
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
   }, [items]);
@@ -71,6 +74,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
       }
       return [...prev, { ...item, quantity: item.quantity || 1 }];
     });
+    // Trigger badge animation
+    setBadgeAnimationTrigger(prev => prev + 1);
+  }, []);
+
+  const triggerBadgeAnimation = useCallback(() => {
+    setBadgeAnimationTrigger(prev => prev + 1);
   }, []);
 
   const removeItem = useCallback((id: string) => {
@@ -110,7 +119,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
     isInCart,
     clearCart,
     itemCount,
-  }), [items, addItem, removeItem, updateQuantity, isInCart, clearCart, itemCount]);
+    triggerBadgeAnimation,
+  }), [items, addItem, removeItem, updateQuantity, isInCart, clearCart, itemCount, triggerBadgeAnimation]);
 
   return (
     <CartContext.Provider value={contextValue}>
