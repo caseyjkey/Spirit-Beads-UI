@@ -81,7 +81,7 @@ const ProductCard = ({ id, name, price, image, pattern, isSoldOut = false }: Pro
               <button
                 onClick={handleAddToCart}
                 disabled={inCart}
-                className="add-button-bloom border border-primary text-primary bg-transparent disabled:border-foreground disabled:text-foreground disabled:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-60 h-[44px] w-[70px] md:h-[32px] md:w-[60px] text-xs font-medium rounded-md flex items-center justify-center min-w-0 px-2 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-[0.98] active:duration-[100ms]"
+                className="add-button-bloom border border-primary text-primary bg-transparent disabled:border-foreground disabled:text-foreground disabled:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-60 h-[44px] w-[70px] md:h-[32px] md:w-[60px] text-xs font-medium rounded-md flex items-center justify-center min-w-0 px-2 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-[0.98] active:duration-[100ms] active:scale-95 md:active:scale-[0.98]"
               >
                 <span className={`relative z-10 transition-opacity duration-[150ms] ${inCart ? 'opacity-0' : 'opacity-100'} whitespace-nowrap`}>
                   Add

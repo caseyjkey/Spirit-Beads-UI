@@ -247,8 +247,11 @@ export const CheckoutSidebar = ({ isOpen, onClose }: CheckoutSidebarProps) => {
                 ))}
               </div>
               
+              {/* Divider */}
+              <div className="border-t border-gray-100 mx-6 my-4" />
+              
               {/* Trust Pillars */}
-              <div className="mt-8 px-6">
+              <div className="px-6">
                 <TrustPillars />
               </div>
             </div>
