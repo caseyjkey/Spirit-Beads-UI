@@ -1,12 +1,24 @@
 import { Helmet } from "react-helmet-async";
+import { useEffect } from "react";
 import Header from "@/components/Header";
 import ShippingBanner from "@/components/ShippingBanner";
 import Hero from "@/components/Hero";
 import ProductGrid from "@/components/ProductGrid";
 import AboutSection from "@/components/AboutSection";
 import Footer from "@/components/Footer";
+import { Toast } from "@/components/Toast";
+import { useToast } from "@/hooks/use-toast-custom";
 
 const Index = () => {
+  const { isVisible, message, toastKey, hideToast, register, unregister } = useToast();
+
+  useEffect(() => {
+    register();
+    return () => {
+      unregister();
+    };
+  }, [register, unregister]);
+
   return (
     <>
       <Helmet>
@@ -30,6 +42,14 @@ const Index = () => {
           <AboutSection />
         </main>
         <Footer />
+        
+        {/* Global Toast */}
+        <Toast 
+          message={message} 
+          isVisible={isVisible} 
+          toastKey={toastKey}
+          onDismiss={hideToast}
+        />
       </div>
     </>
   );

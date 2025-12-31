@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/use-cart";
+import { useToast } from "@/hooks/use-toast-custom";
 import { Check } from "lucide-react";
 
 interface ProductCardProps {
@@ -13,6 +14,7 @@ interface ProductCardProps {
 
 const ProductCard = ({ id, name, price, image, pattern, isSoldOut = false }: ProductCardProps) => {
   const { addItem, isInCart } = useCart();
+  const { showToast } = useToast();
   const itemId = String(id);
   const inCart = isInCart(itemId);
 
@@ -23,6 +25,7 @@ const ProductCard = ({ id, name, price, image, pattern, isSoldOut = false }: Pro
       image,
       quantity: 1,
     });
+    showToast(`${name} added to cart`);
   };
 
   const getImageUrl = (imageSrc: string) => {

@@ -9,6 +9,13 @@ const Header = () => {
   const [isMenuVisible, setIsMenuVisible] = useState(false);
   const { isOpen, openSidebar, closeSidebar } = useCheckoutSidebar();
 
+  // Close hamburger menu when cart opens
+  useEffect(() => {
+    if (isOpen && isMenuOpen) {
+      setIsMenuOpen(false);
+    }
+  }, [isOpen, isMenuOpen]);
+
   useEffect(() => {
     if (isMenuOpen) {
       setIsMenuRendered(true);
@@ -70,20 +77,18 @@ const Header = () => {
 
           {/* Mobile Menu Toggle & Cart */}
           <div className="md:hidden flex items-center gap-2">
-            {!isOpen && (
-              <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className={`hamburger-toggle p-2 text-foreground${isMenuOpen ? " is-open" : ""}`}
-                aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-                aria-expanded={isMenuOpen}
-              >
-                <span className="hamburger" aria-hidden="true">
-                  <span className="hamburger-line" />
-                  <span className="hamburger-line" />
-                  <span className="hamburger-line" />
-                </span>
-              </button>
-            )}
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className={`hamburger-toggle p-2 text-foreground${isMenuOpen ? " is-open" : ""} transition-opacity duration-800 ${isOpen ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={isMenuOpen}
+            >
+              <span className="hamburger" aria-hidden="true">
+                <span className="hamburger-line" />
+                <span className="hamburger-line" />
+                <span className="hamburger-line" />
+              </span>
+            </button>
             <CartButton onClick={openSidebar} />
           </div>
         </div>

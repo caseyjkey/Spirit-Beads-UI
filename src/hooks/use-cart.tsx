@@ -105,6 +105,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
         item.id === id ? { ...item, quantity } : item
       )
     );
+    
+    // Trigger badge animation on quantity change
+    setBadgeAnimationTrigger(prev => prev + 1);
   }, [removeItem]);
 
   const isInCart = useCallback((id: string) => items.some((item) => item.id === id), [items]);
