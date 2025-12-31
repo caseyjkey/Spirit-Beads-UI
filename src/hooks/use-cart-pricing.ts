@@ -32,7 +32,7 @@ export const useCartPricing = () => {
             return {
               ...product,
               cartId: cartItem.id,
-              quantity: cartItem.quantity || 1,
+              quantity: cartItem.quantity,
             };
           })
           .filter(Boolean) as (Product & { cartId: string; quantity: number })[];
