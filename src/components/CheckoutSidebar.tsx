@@ -20,6 +20,8 @@ export const CheckoutSidebar = ({ isOpen, onClose }: CheckoutSidebarProps) => {
   const { checkout, isLoading, error, setError } = useCheckout();
   const [showCheckoutError, setShowCheckoutError] = useState(false);
   const [localCheckoutError, setLocalCheckoutError] = useState<CheckoutError | null>(null);
+  const [isRendered, setIsRendered] = useState(isOpen);
+  const [isVisible, setIsVisible] = useState(false);
 
   // Control external overlay for nuclear debugging test
   useEffect(() => {
@@ -51,6 +53,27 @@ export const CheckoutSidebar = ({ isOpen, onClose }: CheckoutSidebarProps) => {
       }
     }
   }, [isOpen, onClose]);
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsRendered(true);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setIsVisible(true);
+        });
+      });
+      return;
+    }
+
+    setIsVisible(false);
+    const timeoutId = window.setTimeout(() => {
+      setIsRendered(false);
+    }, 400);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [isOpen]);
 
   const formatPrice = (cents: number) => {
     return `$${(cents / 100).toFixed(2)}`;
@@ -96,12 +119,14 @@ export const CheckoutSidebar = ({ isOpen, onClose }: CheckoutSidebarProps) => {
     updateQuantity(cartId, newQuantity);
   };
 
-  if (!isOpen) return null;
+  if (!isRendered) return null;
 
   return (
     <>
       {/* Checkout Sidebar */}
-      <div className="fixed right-0 top-16 md:top-20 h-[calc(100vh-4rem)] md:h-[calc(100vh-5rem)] w-[400px] bg-white shadow-2xl z-[160] flex flex-col">
+      <div
+        className={`checkout-sidebar fixed right-0 top-16 md:top-20 h-[calc(100vh-4rem)] md:h-[calc(100vh-5rem)] w-[400px] bg-white shadow-2xl z-[160] flex flex-col${isVisible ? " is-open" : ""}`}
+      >
         {/* Header with Close Button */}
         <div className="relative flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-xl font-display font-semibold">Your Cart</h2>

@@ -315,14 +315,15 @@
     
     /* Initial State (Hidden) */
     opacity: 0;
-    backdrop-filter: blur(0px);
-    -webkit-backdrop-filter: blur(0px);
+    backdrop-filter: blur(0px) brightness(100%);
+    -webkit-backdrop-filter: blur(0px) brightness(100%);
     pointer-events: none; /* Prevents clicking the blur before it's visible */
 
     /* Ensure no delay exists */
     transition: 
       opacity 400ms cubic-bezier(0.4, 0, 0.2, 1), 
-      backdrop-filter 400ms cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter 400ms cubic-bezier(0.4, 0, 0.2, 1),
+      -webkit-backdrop-filter 400ms cubic-bezier(0.4, 0, 0.2, 1);
     transition-delay: 0s;
   }
 
@@ -332,5 +333,26 @@
     backdrop-filter: blur(12px) brightness(90%);
     -webkit-backdrop-filter: blur(12px) brightness(90%);
     pointer-events: auto;
+  }
+
+  .checkout-sidebar {
+    transform: translate3d(100%, 0, 0);
+    transition: transform 400ms cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+  }
+
+  .checkout-sidebar.is-open {
+    transform: translate3d(0, 0, 0);
+    transition-delay: 100ms;
+  }
+
+  .checkout-sidebar:not(.is-open) {
+    transition-delay: 0ms;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .checkout-sidebar {
+      transition: none;
+    }
   }
 }
