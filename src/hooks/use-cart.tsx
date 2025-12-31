@@ -16,6 +16,7 @@ interface CartContextType {
   clearCart: () => void;
   itemCount: number;
   triggerBadgeAnimation: () => void;
+  badgeAnimationTrigger: number;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -80,7 +81,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const triggerBadgeAnimation = useCallback(() => {
     setBadgeAnimationTrigger(prev => prev + 1);
-  }, []);
+    return badgeAnimationTrigger; 
+  }, [badgeAnimationTrigger]);
 
   const removeItem = useCallback((id: string) => {
     setItems((prev) => prev.filter((item) => item.id !== id));
@@ -120,7 +122,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
     clearCart,
     itemCount,
     triggerBadgeAnimation,
-  }), [items, addItem, removeItem, updateQuantity, isInCart, clearCart, itemCount, triggerBadgeAnimation]);
+    badgeAnimationTrigger,
+  }), [items, addItem, removeItem, updateQuantity, isInCart, clearCart, itemCount, triggerBadgeAnimation, badgeAnimationTrigger]);
 
   return (
     <CartContext.Provider value={contextValue}>

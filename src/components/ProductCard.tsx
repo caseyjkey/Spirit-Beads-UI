@@ -62,22 +62,7 @@ const ProductCard = ({ id, name, price, image, pattern, isSoldOut = false }: Pro
           </div>
         )}
 
-        {/* Quick Add Overlay - Only show on desktop hover */}
-        {!isSoldOut && (
-          <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors duration-300 flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100 md:block hidden">
-            {inCart ? (
-              <Button variant="secondary" size="default" disabled>
-                <Check className="h-4 w-4 mr-2" />
-                In Cart
-              </Button>
-            ) : (
-              <Button variant="hero" size="default" onClick={handleAddToCart}>
-                Add to Cart
-              </Button>
-            )}
-          </div>
-        )}
-      </div>
+              </div>
 
       {/* Product Info */}
       <div className="p-4">
@@ -91,21 +76,20 @@ const ProductCard = ({ id, name, price, image, pattern, isSoldOut = false }: Pro
           <p className="font-body text-lg font-semibold text-primary">
             ${(Number(price) / 100).toFixed(2)}
           </p>
-          {!isSoldOut && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleAddToCart}
-              className="border border-current hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-colors duration-300"
-              disabled={inCart}
-            >
-              {inCart ? (
-                <Check className="h-4 w-4" />
-              ) : (
-                <span className="text-xs font-medium">Add</span>
-              )}
-            </Button>
-          )}
+          <div className="flex items-center">
+            {!isSoldOut && (
+              <button
+                onClick={handleAddToCart}
+                disabled={inCart}
+                className="add-button-bloom border border-primary text-primary bg-transparent disabled:border-foreground disabled:text-foreground disabled:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-60 h-[44px] w-[70px] md:h-[32px] md:w-[60px] text-xs font-medium rounded-md flex items-center justify-center min-w-0 px-2 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-[0.98] active:duration-[100ms]"
+              >
+                <span className={`relative z-10 transition-opacity duration-[150ms] ${inCart ? 'opacity-0' : 'opacity-100'} whitespace-nowrap`}>
+                  Add
+                </span>
+                <Check className={`z-10 h-4 w-4 transition-opacity duration-[150ms] ${inCart ? 'opacity-100' : 'opacity-0'} absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2`} />
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

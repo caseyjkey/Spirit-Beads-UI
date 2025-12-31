@@ -19,6 +19,8 @@ const buttonVariants = cva(
         hero: "bg-primary text-primary-foreground hover:bg-rust shadow-medium hover:shadow-glow hover:-translate-y-0.5",
         accent: "bg-accent text-accent-foreground hover:bg-accent/90 shadow-soft hover:shadow-glow",
         artisan: "bg-deep-brown text-cream hover:bg-deep-brown/90 shadow-soft",
+        // Ghost button with orange brand color
+        "ghost-orange": "border border-terracotta text-terracotta bg-transparent hover:bg-terracotta hover:text-white transition-all duration-200",
       },
       size: {
         default: "h-10 px-4 py-2 text-sm",
