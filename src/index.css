@@ -355,4 +355,109 @@
       transition: none;
     }
   }
+
+  .cart-item {
+    transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    max-height: 200px;
+    margin-top: 1rem;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .cart-item:first-child {
+    margin-top: 0;
+  }
+
+  .cart-item-inner {
+    display: flex;
+    gap: 1rem;
+    padding: 0;
+  }
+
+  .cart-item.is-deleting {
+    opacity: 0;
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    transform: translateX(10px);
+  }
+
+  .hamburger {
+    position: relative;
+    display: inline-flex;
+    width: 24px;
+    height: 24px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hamburger-line {
+    position: absolute;
+    left: 4px;
+    right: 4px;
+    height: 2px;
+    border-radius: 999px;
+    background: currentColor;
+    transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1), opacity 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .hamburger-line:nth-child(1) {
+    transform: translateY(-6px);
+  }
+
+  .hamburger-line:nth-child(2) {
+    transform: translateY(0);
+  }
+
+  .hamburger-line:nth-child(3) {
+    transform: translateY(6px);
+  }
+
+  .hamburger-toggle.is-open .hamburger-line:nth-child(1) {
+    transform: translateY(0) rotate(45deg);
+  }
+
+  .hamburger-toggle.is-open .hamburger-line:nth-child(2) {
+    opacity: 0;
+  }
+
+  .hamburger-toggle.is-open .hamburger-line:nth-child(3) {
+    transform: translateY(0) rotate(-45deg);
+  }
+
+  .mobile-nav {
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(-8px);
+    padding-top: 0;
+    padding-bottom: 0;
+    transition:
+      max-height 250ms cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 250ms cubic-bezier(0.4, 0, 0.2, 1),
+      transform 250ms cubic-bezier(0.4, 0, 0.2, 1),
+      padding-top 250ms cubic-bezier(0.4, 0, 0.2, 1),
+      padding-bottom 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .mobile-nav.is-open {
+    max-height: 320px;
+    opacity: 1;
+    transform: translateY(0);
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hamburger-line,
+    .mobile-nav {
+      transition: none;
+    }
+  }
 }

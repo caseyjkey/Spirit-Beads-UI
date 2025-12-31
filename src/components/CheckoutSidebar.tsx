@@ -7,12 +7,55 @@ import { useCheckout, CheckoutError } from "@/hooks/use-checkout";
 import { Separator } from "@/components/ui/separator";
 import { QuantitySelector } from "@/components/ui/quantity-selector";
 import { CheckoutErrorDisplay } from "@/components/ui/checkout-error-display";
-import { TrustPillars } from "./TrustPillars";
+import { TrustPillars } from "@/components/TrustPillars";
 
 interface CheckoutSidebarProps {
   isOpen: boolean;
   onClose: () => void;
 }
+
+type CartItemRowProps = {
+  cartId: string;
+  onRemove: (cartId: string) => void;
+  children: React.ReactNode;
+};
+
+const CartItemRow = ({ cartId, onRemove, children }: CartItemRowProps) => {
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    if (!isDeleting) return;
+    const removeTimeoutId = window.setTimeout(() => {
+      onRemove(cartId);
+    }, 250);
+
+    return () => {
+      window.clearTimeout(removeTimeoutId);
+    };
+  }, [cartId, isDeleting, onRemove]);
+
+  const handleDelete = () => {
+    if (isDeleting) return;
+    setIsDeleting(true);
+  };
+
+  return (
+    <div className={`cart-item${isDeleting ? " is-deleting" : ""}`}>
+      <div className="cart-item-inner">
+        {children}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleDelete}
+          disabled={isDeleting}
+          className="text-gray-400 hover:text-red-500 flex-shrink-0"
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
+};
 
 export const CheckoutSidebar = ({ isOpen, onClose }: CheckoutSidebarProps) => {
   const { items, removeItem, itemCount, updateQuantity } = useCart();
@@ -164,9 +207,9 @@ export const CheckoutSidebar = ({ isOpen, onClose }: CheckoutSidebarProps) => {
           <>
             {/* Product List */}
             <div className="flex-1 overflow-auto py-4 max-h-[calc(100vh-16rem)] md:max-h-[calc(100vh-20rem)]">
-              <div className="space-y-4 px-6">
+              <div className="px-6">
                 {cartItemsWithPricing.map((item) => (
-                  <div key={item.cartId} className="flex gap-4">
+                  <CartItemRow key={item.cartId} cartId={item.cartId} onRemove={removeItem}>
                     <div className="w-20 h-24 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
                       <img
                         src={getImageUrl(item.primary_image || item.image || '/placeholder-product.jpg')}
@@ -200,15 +243,7 @@ export const CheckoutSidebar = ({ isOpen, onClose }: CheckoutSidebarProps) => {
                         </p>
                       )}
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeItem(item.cartId)}
-                      className="text-gray-400 hover:text-red-500 flex-shrink-0"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  </CartItemRow>
                 ))}
               </div>
               

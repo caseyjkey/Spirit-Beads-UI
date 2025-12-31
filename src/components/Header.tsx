@@ -1,9 +1,34 @@
-import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { useState, useEffect } from "react";
 import { CartButton } from "./CartButton";
+import { useCheckoutSidebar } from "@/hooks/use-checkout-sidebar";
+import { CheckoutSidebar } from "@/components/CheckoutSidebar";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMenuRendered, setIsMenuRendered] = useState(false);
+  const [isMenuVisible, setIsMenuVisible] = useState(false);
+  const { isOpen, openSidebar, closeSidebar } = useCheckoutSidebar();
+
+  useEffect(() => {
+    if (isMenuOpen) {
+      setIsMenuRendered(true);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setIsMenuVisible(true);
+        });
+      });
+      return;
+    }
+
+    setIsMenuVisible(false);
+    const timeoutId = window.setTimeout(() => {
+      setIsMenuRendered(false);
+    }, 250);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [isMenuOpen]);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-[100] bg-background/95 backdrop-blur-sm border-b border-border">
@@ -40,24 +65,32 @@ const Header = () => {
 
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-4">
-            <CartButton />
+            <CartButton onClick={openSidebar} />
           </div>
 
           {/* Mobile Menu Toggle & Cart */}
           <div className="md:hidden flex items-center gap-2">
-            <CartButton />
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-2 text-foreground"
-            >
-              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
+            {!isOpen && (
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className={`hamburger-toggle p-2 text-foreground${isMenuOpen ? " is-open" : ""}`}
+                aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+                aria-expanded={isMenuOpen}
+              >
+                <span className="hamburger" aria-hidden="true">
+                  <span className="hamburger-line" />
+                  <span className="hamburger-line" />
+                  <span className="hamburger-line" />
+                </span>
+              </button>
+            )}
+            <CartButton onClick={openSidebar} />
           </div>
         </div>
 
         {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <nav className="md:hidden py-4 border-t border-border animate-fade-in">
+        {isMenuRendered && (
+          <nav className={`mobile-nav md:hidden border-t border-border${isMenuVisible ? " is-open" : ""}`}>
             <div className="flex flex-col gap-4">
               <a
                 href="#collection"
@@ -84,6 +117,8 @@ const Header = () => {
           </nav>
         )}
       </div>
+
+      <CheckoutSidebar isOpen={isOpen} onClose={closeSidebar} />
     </header>
   );
 };
