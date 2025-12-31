@@ -4,7 +4,7 @@ import { apiClient, Product } from '@/lib/api';
 
 export const useCartPricing = () => {
   const { items } = useCart();
-  const [cartItemsWithPricing, setCartItemsWithPricing] = useState<(Product & { cartId: string; quantity: number })[]>([]);
+  const [cartItemsWithPricing, setCartItemsWithPricing] = useState<(Product & { cartId: string; quantity: number; image: string })[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,9 +33,10 @@ export const useCartPricing = () => {
               ...product,
               cartId: cartItem.id,
               quantity: cartItem.quantity,
+              image: cartItem.image, // Preserve the original cart item image
             };
           })
-          .filter(Boolean) as (Product & { cartId: string; quantity: number })[];
+          .filter(Boolean) as (Product & { cartId: string; quantity: number; image: string })[];
 
         setCartItemsWithPricing(cartWithPricing);
       } catch (err) {

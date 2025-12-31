@@ -1,9 +1,21 @@
 import { useState } from 'react';
 import { useCart } from '@/hooks/use-cart';
 
+export interface CheckoutErrorDetail {
+  product_id: string;
+  error: string;
+  message: string;
+}
+
+export interface CheckoutError {
+  error?: string;
+  message: string;
+  details?: CheckoutErrorDetail[];
+}
+
 export const useCheckout = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<CheckoutError | null>(null);
   const { items } = useCart();
 
   const checkout = async () => {
@@ -14,7 +26,7 @@ export const useCheckout = () => {
       // Transform cart items to match required API structure
       const apiItems = items.map(item => ({
         product_id: item.id,
-        quantity: 1 // Assuming quantity is always 1 for now
+        quantity: item.quantity
       }));
 
       const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://spirit-beads.keycasey.com/api';
@@ -29,7 +41,16 @@ export const useCheckout = () => {
       });
 
       if (!response.ok) {
-        throw new Error(`Checkout failed: ${response.status} ${response.statusText}`);
+        const errorData = await response.json().catch(() => ({}));
+        
+        // Parse structured error response
+        const checkoutError: CheckoutError = {
+          message: errorData.message || errorData.error || `Checkout failed: ${response.status} ${response.statusText}`,
+          details: errorData.details || []
+        };
+        
+        setError(checkoutError);
+        throw checkoutError; // Throw the actual error object instead of just message
       }
 
       const data = await response.json();
@@ -37,12 +58,14 @@ export const useCheckout = () => {
       // Redirect to Stripe checkout (don't clear cart yet)
       window.location.href = data.checkout_url;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Checkout failed');
+      if (err instanceof Error) {
+        setError({ message: err.message, details: [] });
+      }
       throw err;
     } finally {
       setIsLoading(false);
     }
   };
 
-  return { checkout, isLoading, error };
+  return { checkout, isLoading, error, setError };
 };

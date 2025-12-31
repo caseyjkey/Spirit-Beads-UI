@@ -21,11 +21,38 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 const CART_STORAGE_KEY = "sacred-beads-cart";
 
+const sanitizeCartData = (data: any): CartItem[] => {
+  if (!Array.isArray(data)) return [];
+  
+  return data.filter(item => {
+    // Validate item structure
+    if (!item || typeof item !== 'object') return false;
+    if (!item.id || typeof item.id !== 'string') return false;
+    if (!item.title || typeof item.title !== 'string') return false;
+    if (!item.image || typeof item.image !== 'string') return false;
+    
+    // Validate and sanitize quantity
+    const quantity = parseInt(item.quantity, 10);
+    if (isNaN(quantity) || quantity < 1 || quantity > 999) return false;
+    
+    item.quantity = quantity;
+    return true;
+  });
+};
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>(() => {
     if (typeof window === "undefined") return [];
     const stored = localStorage.getItem(CART_STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
+    if (!stored) return [];
+    
+    try {
+      const parsed = JSON.parse(stored);
+      return sanitizeCartData(parsed);
+    } catch (error) {
+      console.error('Failed to parse cart data:', error);
+      return [];
+    }
   });
 
   useEffect(() => {
@@ -51,10 +78,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const updateQuantity = useCallback((id: string, quantity: number) => {
+    // Validate quantity
+    if (!Number.isInteger(quantity) || quantity < 0 || quantity > 999) {
+      console.error('Invalid quantity:', quantity);
+      return;
+    }
+    
     if (quantity <= 0) {
       removeItem(id);
       return;
     }
+    
     setItems((prev) => 
       prev.map((item) => 
         item.id === id ? { ...item, quantity } : item

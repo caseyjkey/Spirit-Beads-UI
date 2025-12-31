@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ShoppingBag, X, Trash2 } from "lucide-react";
 import {
@@ -9,27 +10,62 @@ import {
 } from "@/components/ui/sheet";
 import { useCart } from "@/hooks/use-cart";
 import { useCartPricing } from "@/hooks/use-cart-pricing";
-import { useCheckout } from "@/hooks/use-checkout";
+import { useCheckout, CheckoutError } from "@/hooks/use-checkout";
 import { Separator } from "@/components/ui/separator";
 import { QuantitySelector } from "@/components/ui/quantity-selector";
+import { CheckoutErrorDisplay } from "@/components/ui/checkout-error-display";
 import { Loader2 } from "lucide-react";
 
 const CartSheet = () => {
   const { items, removeItem, itemCount, updateQuantity } = useCart();
   const { cartItemsWithPricing, loading, error: pricingError, subtotal } = useCartPricing();
-  const { checkout, isLoading, error } = useCheckout();
+  const { checkout, isLoading, error, setError } = useCheckout();
+  const [showCheckoutError, setShowCheckoutError] = useState(false);
+  const [localCheckoutError, setLocalCheckoutError] = useState<CheckoutError | null>(null);
 
   const formatPrice = (cents: number) => {
     return `$${(cents / 100).toFixed(2)}`;
   };
 
+  const getImageUrl = (imageSrc: string) => {
+    // If it's already a full URL, return as is
+    if (imageSrc.startsWith('http')) {
+      return imageSrc;
+    }
+    // If it's a relative path from Django media, prepend the base API URL (without /api)
+    if (imageSrc.startsWith('/media/')) {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://spirit-beads.keycasey.com/api';
+      const mediaBaseUrl = baseUrl.replace('/api', '');
+      return `${mediaBaseUrl}${imageSrc}`;
+    }
+    // Otherwise treat as local asset
+    return imageSrc;
+  };
+
   const handleCheckout = async () => {
     try {
+      setShowCheckoutError(false);
+      setLocalCheckoutError(null);
       await checkout();
     } catch (err) {
-      // Error is handled in the hook
-      console.error('Checkout error:', err);
+      // Handle CheckoutError objects
+      if (err && typeof err === 'object' && 'message' in err && 'details' in err) {
+        setLocalCheckoutError(err as CheckoutError);
+      } else {
+        setLocalCheckoutError({ 
+          message: err instanceof Error ? err.message : 'Checkout failed', 
+          details: [] 
+        });
+      }
+      
+      setShowCheckoutError(true);
     }
+  };
+
+  const handleDismissError = () => {
+    setShowCheckoutError(false);
+    setLocalCheckoutError(null);
+    setError(null);
   };
 
   const handleQuantityChange = (cartId: string, newQuantity: number) => {
@@ -69,9 +105,12 @@ const CartSheet = () => {
                   <div key={item.cartId} className="flex gap-4">
                     <div className="w-20 h-24 bg-secondary rounded-md overflow-hidden flex-shrink-0">
                       <img
-                        src={item.primary_image || '/placeholder-product.jpg'}
+                        src={getImageUrl(item.primary_image || item.image || '/placeholder-product.jpg')}
                         alt={item.name}
                         className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = '/placeholder-product.svg';
+                        }}
                       />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -116,10 +155,11 @@ const CartSheet = () => {
                   <p className="text-sm text-destructive">{pricingError}</p>
                 </div>
               )}
-              {error && (
-                <div className="bg-destructive/10 border border-destructive/20 rounded-md p-3">
-                  <p className="text-sm text-destructive">{error}</p>
-                </div>
+              {localCheckoutError && showCheckoutError && (
+                <CheckoutErrorDisplay 
+                  error={localCheckoutError} 
+                  onDismiss={handleDismissError}
+                />
               )}
               <div className="flex items-center justify-between">
                 <span className="font-body text-muted-foreground">Subtotal</span>
