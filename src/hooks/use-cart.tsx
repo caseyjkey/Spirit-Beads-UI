@@ -1,20 +1,20 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode, useMemo, useCallback } from "react";
 
 export interface CartItem {
   id: string;
   title: string;
-  price: number; // in cents
   image: string;
+  quantity: number;
 }
 
 interface CartContextType {
   items: CartItem[];
   addItem: (item: CartItem) => void;
   removeItem: (id: string) => void;
+  updateQuantity: (id: string, quantity: number) => void;
   isInCart: (id: string) => boolean;
-  subtotal: number;
-  itemCount: number;
   clearCart: () => void;
+  itemCount: number;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -32,29 +32,54 @@ export function CartProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
   }, [items]);
 
-  const addItem = (item: CartItem) => {
+  const addItem = useCallback((item: CartItem) => {
     setItems((prev) => {
-      if (prev.some((i) => i.id === item.id)) return prev;
-      return [...prev, item];
+      const existingItem = prev.find((i) => i.id === item.id);
+      if (existingItem) {
+        return prev.map((i) => 
+          i.id === item.id 
+            ? { ...i, quantity: i.quantity + (item.quantity || 1) }
+            : i
+        );
+      }
+      return [...prev, { ...item, quantity: item.quantity || 1 }];
     });
-  };
+  }, []);
 
-  const removeItem = (id: string) => {
+  const removeItem = useCallback((id: string) => {
     setItems((prev) => prev.filter((item) => item.id !== id));
-  };
+  }, []);
 
-  const isInCart = (id: string) => items.some((item) => item.id === id);
+  const updateQuantity = useCallback((id: string, quantity: number) => {
+    if (quantity <= 0) {
+      removeItem(id);
+      return;
+    }
+    setItems((prev) => 
+      prev.map((item) => 
+        item.id === id ? { ...item, quantity } : item
+      )
+    );
+  }, [removeItem]);
 
-  const subtotal = items.reduce((sum, item) => sum + item.price, 0);
+  const isInCart = useCallback((id: string) => items.some((item) => item.id === id), [items]);
 
-  const itemCount = items.length;
+  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
-  const clearCart = () => setItems([]);
+  const clearCart = useCallback(() => setItems([]), []);
+
+  const contextValue = useMemo(() => ({
+    items,
+    addItem,
+    removeItem,
+    updateQuantity,
+    isInCart,
+    clearCart,
+    itemCount,
+  }), [items, addItem, removeItem, updateQuantity, isInCart, clearCart, itemCount]);
 
   return (
-    <CartContext.Provider
-      value={{ items, addItem, removeItem, isInCart, subtotal, itemCount, clearCart }}
-    >
+    <CartContext.Provider value={contextValue}>
       {children}
     </CartContext.Provider>
   );

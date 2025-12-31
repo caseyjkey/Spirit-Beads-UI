@@ -1,5 +1,5 @@
-import { ShoppingBag, X, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ShoppingBag, X, Trash2 } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -8,13 +8,32 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useCart } from "@/hooks/use-cart";
+import { useCartPricing } from "@/hooks/use-cart-pricing";
+import { useCheckout } from "@/hooks/use-checkout";
 import { Separator } from "@/components/ui/separator";
+import { QuantitySelector } from "@/components/ui/quantity-selector";
+import { Loader2 } from "lucide-react";
 
 const CartSheet = () => {
-  const { items, removeItem, subtotal, itemCount } = useCart();
+  const { items, removeItem, itemCount, updateQuantity } = useCart();
+  const { cartItemsWithPricing, loading, error: pricingError, subtotal } = useCartPricing();
+  const { checkout, isLoading, error } = useCheckout();
 
   const formatPrice = (cents: number) => {
     return `$${(cents / 100).toFixed(2)}`;
+  };
+
+  const handleCheckout = async () => {
+    try {
+      await checkout();
+    } catch (err) {
+      // Error is handled in the hook
+      console.error('Checkout error:', err);
+    }
+  };
+
+  const handleQuantityChange = (cartId: string, newQuantity: number) => {
+    updateQuantity(cartId, newQuantity);
   };
 
   return (
@@ -46,27 +65,42 @@ const CartSheet = () => {
           <>
             <div className="flex-1 overflow-auto py-4">
               <div className="space-y-4">
-                {items.map((item) => (
-                  <div key={item.id} className="flex gap-4">
+                {cartItemsWithPricing.map((item) => (
+                  <div key={item.cartId} className="flex gap-4">
                     <div className="w-20 h-24 bg-secondary rounded-md overflow-hidden flex-shrink-0">
                       <img
-                        src={item.image}
-                        alt={item.title}
+                        src={item.primary_image || '/placeholder-product.jpg'}
+                        alt={item.name}
                         className="w-full h-full object-cover"
                       />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="font-display font-medium text-foreground truncate">
-                        {item.title}
+                        {item.name}
                       </h4>
                       <p className="font-body text-primary font-semibold mt-1">
                         {formatPrice(item.price)}
                       </p>
+                      {item.inventory_count > 1 && (
+                        <div className="mt-2">
+                          <QuantitySelector
+                            quantity={item.quantity}
+                            maxQuantity={item.inventory_count}
+                            onQuantityChange={(newQuantity) => handleQuantityChange(item.cartId, newQuantity)}
+                            size="sm"
+                          />
+                        </div>
+                      )}
+                      {item.inventory_count <= 1 && (
+                        <p className="font-body text-xs text-muted-foreground mt-2">
+                          Quantity: {item.quantity}
+                        </p>
+                      )}
                     </div>
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => removeItem(item.id)}
+                      onClick={() => removeItem(item.cartId)}
                       className="text-muted-foreground hover:text-destructive flex-shrink-0"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -77,13 +111,34 @@ const CartSheet = () => {
             </div>
 
             <div className="border-t border-border pt-4 space-y-4">
+              {pricingError && (
+                <div className="bg-destructive/10 border border-destructive/20 rounded-md p-3">
+                  <p className="text-sm text-destructive">{pricingError}</p>
+                </div>
+              )}
+              {error && (
+                <div className="bg-destructive/10 border border-destructive/20 rounded-md p-3">
+                  <p className="text-sm text-destructive">{error}</p>
+                </div>
+              )}
               <div className="flex items-center justify-between">
                 <span className="font-body text-muted-foreground">Subtotal</span>
-                <span className="font-display text-xl font-semibold text-foreground">
-                  {formatPrice(subtotal)}
-                </span>
+                <div className="h-[1.25rem] flex items-center justify-center">
+                  {loading ? (
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  ) : (
+                    <span className="font-display text-xl font-semibold text-foreground">
+                      {formatPrice(subtotal)}
+                    </span>
+                  )}
+                </div>
               </div>
-              <Button className="w-full" size="lg">
+              <Button 
+                className="w-full transition-all duration-100" 
+                size="lg" 
+                onClick={handleCheckout}
+                disabled={isLoading}
+              >
                 Checkout
               </Button>
               <p className="font-body text-xs text-center text-muted-foreground">

@@ -20,8 +20,8 @@ const ProductCard = ({ id, name, price, image, pattern, isSoldOut = false }: Pro
     addItem({
       id: itemId,
       title: name,
-      price: Math.round(Number(price) * 100), // convert to cents
       image,
+      quantity: 1,
     });
   };
 
@@ -88,7 +88,7 @@ const ProductCard = ({ id, name, price, image, pattern, isSoldOut = false }: Pro
           {name}
         </h3>
         <p className="font-body text-lg font-semibold text-primary">
-          ${Number(price).toFixed(2)}
+          ${(Number(price) / 100).toFixed(2)}
         </p>
       </div>
     </div>
