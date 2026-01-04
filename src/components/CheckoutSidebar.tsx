@@ -86,7 +86,7 @@ export const CheckoutSidebar = ({ isOpen, onClose }: CheckoutSidebarProps) => {
         requestAnimationFrame(() => {
           overlay.classList.add('is-active');
         });
-        
+
         // Add click handler to overlay
         const handleOverlayClick = (e: MouseEvent) => {
           if (e.target === overlay) {
@@ -94,7 +94,7 @@ export const CheckoutSidebar = ({ isOpen, onClose }: CheckoutSidebarProps) => {
           }
         };
         overlay.addEventListener('click', handleOverlayClick);
-        
+
         return () => {
           overlay.removeEventListener('click', handleOverlayClick);
           overlay.classList.remove('is-active');
@@ -154,9 +154,9 @@ export const CheckoutSidebar = ({ isOpen, onClose }: CheckoutSidebarProps) => {
       if (err && typeof err === 'object' && 'message' in err && 'details' in err) {
         setLocalCheckoutError(err as CheckoutError);
       } else {
-        setLocalCheckoutError({ 
-          message: err instanceof Error ? err.message : 'Checkout failed', 
-          details: [] 
+        setLocalCheckoutError({
+          message: err instanceof Error ? err.message : 'Checkout failed',
+          details: []
         });
       }
       setShowCheckoutError(true);
@@ -212,7 +212,7 @@ export const CheckoutSidebar = ({ isOpen, onClose }: CheckoutSidebarProps) => {
                   <CartItemRow key={item.cartId} cartId={item.cartId} onRemove={removeItem}>
                     <div className="w-20 h-24 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
                       <img
-                        src={getImageUrl(item.primary_image || item.image || '/placeholder-product.jpg')}
+                        src={getImageUrl(item.image || '/placeholder-product.jpg')}
                         alt={item.name}
                         className="w-full h-full object-cover"
                         onError={(e) => {
@@ -246,10 +246,10 @@ export const CheckoutSidebar = ({ isOpen, onClose }: CheckoutSidebarProps) => {
                   </CartItemRow>
                 ))}
               </div>
-              
+
               {/* Divider */}
               <div className="border-t border-gray-100 mx-6 my-4" />
-              
+
               {/* Trust Pillars */}
               <div className="px-6">
                 <TrustPillars />
@@ -264,8 +264,8 @@ export const CheckoutSidebar = ({ isOpen, onClose }: CheckoutSidebarProps) => {
                 </div>
               )}
               {localCheckoutError && showCheckoutError && (
-                <CheckoutErrorDisplay 
-                  error={localCheckoutError} 
+                <CheckoutErrorDisplay
+                  error={localCheckoutError}
                   onDismiss={handleDismissError}
                 />
               )}
@@ -281,9 +281,9 @@ export const CheckoutSidebar = ({ isOpen, onClose }: CheckoutSidebarProps) => {
                   )}
                 </div>
               </div>
-              <Button 
-                className="w-full transition-all duration-100" 
-                size="lg" 
+              <Button
+                className="w-full transition-all duration-100"
+                size="lg"
                 onClick={handleCheckout}
                 disabled={isLoading}
               >

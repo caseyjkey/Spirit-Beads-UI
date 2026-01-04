@@ -52,12 +52,12 @@ const CartSheet = () => {
       if (err && typeof err === 'object' && 'message' in err && 'details' in err) {
         setLocalCheckoutError(err as CheckoutError);
       } else {
-        setLocalCheckoutError({ 
-          message: err instanceof Error ? err.message : 'Checkout failed', 
-          details: [] 
+        setLocalCheckoutError({
+          message: err instanceof Error ? err.message : 'Checkout failed',
+          details: []
         });
       }
-      
+
       setShowCheckoutError(true);
     }
   };
@@ -105,7 +105,7 @@ const CartSheet = () => {
                   <div key={item.cartId} className="flex gap-4">
                     <div className="w-20 h-24 bg-secondary rounded-md overflow-hidden flex-shrink-0">
                       <img
-                        src={getImageUrl(item.primary_image || item.image || '/placeholder-product.jpg')}
+                        src={getImageUrl(item.image || '/placeholder-product.jpg')}
                         alt={item.name}
                         className="w-full h-full object-cover"
                         onError={(e) => {
@@ -156,8 +156,8 @@ const CartSheet = () => {
                 </div>
               )}
               {localCheckoutError && showCheckoutError && (
-                <CheckoutErrorDisplay 
-                  error={localCheckoutError} 
+                <CheckoutErrorDisplay
+                  error={localCheckoutError}
                   onDismiss={handleDismissError}
                 />
               )}
@@ -173,9 +173,9 @@ const CartSheet = () => {
                   )}
                 </div>
               </div>
-              <Button 
-                className="w-full transition-all duration-100" 
-                size="lg" 
+              <Button
+                className="w-full transition-all duration-100"
+                size="lg"
                 onClick={handleCheckout}
                 disabled={isLoading}
               >

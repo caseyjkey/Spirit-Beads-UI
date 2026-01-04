@@ -40,7 +40,7 @@ const ProductGrid = () => {
           <p className="font-body text-lg text-muted-foreground mb-8">
             We're having trouble loading our collection. Please try again later.
           </p>
-          <button 
+          <button
             onClick={() => window.location.reload()}
             className="px-6 py-3 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
           >
@@ -62,7 +62,7 @@ const ProductGrid = () => {
             Each One Unique
           </h2>
           <p className="font-body text-lg text-muted-foreground max-w-2xl mx-auto">
-            Every lighter case is individually crafted with traditional beadwork techniques. 
+            Every lighter case is individually crafted with traditional beadwork techniques.
             No two pieces are exactly alike.
           </p>
         </div>
@@ -75,7 +75,7 @@ const ProductGrid = () => {
               className="animate-fade-in-up"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <ProductCard 
+              <ProductCard
                 id={product.id}
                 name={product.name}
                 price={product.price}
