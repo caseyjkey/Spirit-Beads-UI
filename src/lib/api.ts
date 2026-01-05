@@ -6,6 +6,8 @@ export interface Product {
   slug: string;
   pattern: string;
   pattern_display: string;
+  lighter_type: string;
+  lighter_type_display: string;
   price: number;
   description: string;
   is_sold_out: boolean;
@@ -14,6 +16,7 @@ export interface Product {
   weight_ounces: number;
   primary_image?: string;
   is_in_stock: boolean;
+  category?: string;
   created_at: string;
   updated_at: string;
 }

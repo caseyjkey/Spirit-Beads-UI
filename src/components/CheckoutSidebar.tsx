@@ -130,7 +130,7 @@ export const CheckoutSidebar = ({ isOpen, onClose }: CheckoutSidebarProps) => {
   }, [isOpen]);
 
   const formatPrice = (cents: number) => {
-    return `$${(cents / 100).toFixed(2)}`;
+    return `$${Math.floor(cents / 100)}`;
   };
 
   const getImageUrl = (imageSrc: string) => {

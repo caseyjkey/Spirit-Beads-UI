@@ -24,7 +24,7 @@ const CartSheet = () => {
   const [localCheckoutError, setLocalCheckoutError] = useState<CheckoutError | null>(null);
 
   const formatPrice = (cents: number) => {
-    return `$${(cents / 100).toFixed(2)}`;
+    return `$${Math.floor(cents / 100)}`;
   };
 
   const getImageUrl = (imageSrc: string) => {

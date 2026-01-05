@@ -460,4 +460,49 @@
       transition: none;
     }
   }
+
+  /* Category Pills Styles */
+  .category-scroll-container {
+    width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding: 24px 0;
+    scrollbar-width: none; /* Hide scrollbar for Firefox */
+  }
+
+  .category-scroll-container::-webkit-scrollbar {
+    display: none; /* Hide scrollbar for Chrome/Safari */
+  }
+
+  .category-wrapper {
+    display: flex;
+    justify-content: center; /* Centers on desktop */
+    gap: 12px;
+    padding: 0 20px;
+  }
+
+  .pill {
+    padding: 10px 24px;
+    border-radius: 40px;
+    border: 1px solid #D1CDC7;
+    background: transparent;
+    color: #4A4A4A;
+    font-family: var(--font-body), sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+  }
+
+  .pill:hover {
+    border-color: #4A4A4A;
+  }
+
+  .pill.active {
+    background-color: #4A4A4A;
+    color: #F4F1ED;
+    border-color: #4A4A4A;
+  }
 }

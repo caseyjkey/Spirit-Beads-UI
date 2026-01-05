@@ -9,10 +9,11 @@ interface ProductCardProps {
   price: number | string;
   image: string;
   pattern: string;
+  lighterType?: string;
   isSoldOut?: boolean;
 }
 
-const ProductCard = ({ id, name, price, image, pattern, isSoldOut = false }: ProductCardProps) => {
+const ProductCard = ({ id, name, price, image, pattern, lighterType, isSoldOut = false }: ProductCardProps) => {
   const { addItem, isInCart } = useCart();
   const { showToast } = useToast();
   const itemId = String(id);
@@ -56,7 +57,7 @@ const ProductCard = ({ id, name, price, image, pattern, isSoldOut = false }: Pro
             e.currentTarget.src = '/placeholder-product.svg';
           }}
         />
-        
+
         {isSoldOut && (
           <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
             <span className="font-body font-semibold text-foreground uppercase tracking-wider">
@@ -65,7 +66,16 @@ const ProductCard = ({ id, name, price, image, pattern, isSoldOut = false }: Pro
           </div>
         )}
 
-              </div>
+        {/* Lighter Type Badge */}
+        {lighterType && (
+          <div className="absolute top-3 right-3 md:top-4 md:right-4">
+            <span className="inline-block px-2 py-1 text-xs font-medium rounded-md bg-[#4A4A4A]/90 text-[#F4F1ED] backdrop-blur-sm">
+              {lighterType}
+            </span>
+          </div>
+        )}
+
+      </div>
 
       {/* Product Info */}
       <div className="p-4">
@@ -77,7 +87,7 @@ const ProductCard = ({ id, name, price, image, pattern, isSoldOut = false }: Pro
         </h3>
         <div className="flex items-center justify-between">
           <p className="font-body text-lg font-semibold text-primary">
-            ${(Number(price) / 100).toFixed(2)}
+            ${Math.floor(Number(price) / 100)}
           </p>
           <div className="flex items-center">
             {!isSoldOut && (
