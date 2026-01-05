@@ -33,32 +33,32 @@ const AboutSection = () => {
               <br />
               <span className="text-primary">One Bead at a Time</span>
             </h2>
-            
+
             <div className="space-y-4 font-body text-muted-foreground">
               <p>
-                Sacred Beads was born from a deep passion for traditional Native American 
+                SpiritBeads was born from a deep passion for traditional Native American
                 beadwork and a desire to share this beautiful art form with the world.
               </p>
               <p>
-                Each lighter case is meticulously handcrafted using techniques that have 
-                been passed down through generations. The patterns you see are inspired 
-                by the natural world—mountains, rivers, eagles, and the sacred geometry 
+                Each lighter case is meticulously handcrafted using techniques that have
+                been passed down through generations. The patterns you see are inspired
+                by the natural world—mountains, rivers, eagles, and the Spiritgeometry
                 that connects all living things.
               </p>
               <p>
-                When you purchase from Sacred Beads, you're not just buying a product. 
-                You're supporting Indigenous artistry, helping preserve cultural traditions, 
+                When you purchase from SpiritBeads, you're not just buying a product.
+                You're supporting Indigenous artistry, helping preserve cultural traditions,
                 and carrying a piece of handmade history with you.
               </p>
             </div>
 
             <div className="mt-8 p-6 bg-card rounded-lg shadow-soft">
               <p className="font-display text-lg italic text-foreground">
-                "Every bead tells a story. I hope when you hold my work, 
+                "Every bead tells a story. I hope when you hold my work,
                 you feel the love and tradition woven into each piece."
               </p>
               <p className="font-body text-sm text-muted-foreground mt-3">
-                — The Artist
+                — Lynn Reno
               </p>
             </div>
           </div>

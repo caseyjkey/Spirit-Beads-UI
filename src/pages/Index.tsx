@@ -22,7 +22,7 @@ const Index = () => {
   return (
     <>
       <Helmet>
-        <title>Sacred Beads | Handcrafted Native American Beaded Lighter Cases</title>
+        <title>SpiritBeads | Handcrafted Native American Beaded Lighter Cases</title>
         <meta
           name="description"
           content="Shop unique handmade beaded lighter cases crafted by a Native American artisan. Each piece features traditional beadwork patterns. Support Indigenous-owned business."
@@ -30,7 +30,7 @@ const Index = () => {
         <meta name="keywords" content="beaded lighter case, Native American beadwork, handmade lighter cover, Indigenous art, traditional crafts" />
         <link rel="canonical" href="https://sacredbeads.com" />
       </Helmet>
-      
+
       <div className="min-h-screen bg-background">
         {/* Checkout overlay for blur effect */}
         <div id="checkout-overlay" className="checkout-overlay" />
@@ -42,11 +42,11 @@ const Index = () => {
           <AboutSection />
         </main>
         <Footer />
-        
+
         {/* Global Toast */}
-        <Toast 
-          message={message} 
-          isVisible={isVisible} 
+        <Toast
+          message={message}
+          isVisible={isVisible}
           toastKey={toastKey}
           onDismiss={hideToast}
         />

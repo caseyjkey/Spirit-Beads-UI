@@ -7,10 +7,10 @@ const Footer = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Brand */}
           <div className="lg:col-span-2">
-            <h3 className="font-display text-2xl font-semibold mb-4">Sacred Beads</h3>
+            <h3 className="font-display text-2xl font-semibold mb-4">SpiritBeads</h3>
             <p className="font-body text-cream/80 max-w-md mb-6">
-              Handcrafted beaded lighter cases made with love and traditional 
-              Native American techniques. Each piece is unique and carries 
+              Handcrafted beaded lighter cases made with love and traditional
+              Native American techniques. Each piece is unique and carries
               the spirit of its maker.
             </p>
             <div className="flex gap-4">
@@ -69,7 +69,7 @@ const Footer = () => {
           <div>
             <h4 className="font-display text-lg font-medium mb-4">Get in Touch</h4>
             <ul className="space-y-3 font-body text-cream/80">
-              <li>hello@sacredbeads.com</li>
+              <li>lynnbraveheart07@gmail.com</li>
               <li>Custom orders welcome</li>
               <li>Ships from the Southwest</li>
             </ul>
@@ -80,7 +80,7 @@ const Footer = () => {
         <div className="mt-12 pt-8 border-t border-cream/20">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="font-body text-sm text-cream/60">
-              © {new Date().getFullYear()} Sacred Beads. All rights reserved.
+              © {new Date().getFullYear()} SpiritBeads. All rights reserved.
             </p>
             <p className="font-body text-sm text-cream/60">
               Made with ❤️ on Native Land

@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowDown } from "lucide-react";
+import { motion } from "framer-motion";
 import hero1 from "@/assets/hero/hero-1.png";
 import hero2 from "@/assets/hero/hero-2.png";
 import hero3 from "@/assets/hero/hero-3.png";
@@ -81,58 +82,79 @@ const Hero = () => {
           </div>
 
           {/* Hero Image Cluster */}
+          {/* Hero Image Cluster */}
           <div className="relative order-1 md:order-2 flex justify-center">
-            <div className="relative w-full max-w-md lg:max-w-xl">
+            <div className="relative w-full max-w-md lg:max-w-xl aspect-square flex items-center justify-center">
               {/* Glow Effect */}
               <div className="absolute inset-0 bg-gradient-accent rounded-full blur-3xl opacity-20 scale-75" />
 
-              {/* Background Lighters */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                {/* Left Background Lighter */}
-                <img
-                  src={hero2}
-                  alt="Handmade beaded lighter case"
-                  className="absolute w-24 md:w-32 lg:w-40 h-auto object-contain opacity-60 blur-sm animate-float"
-                  style={{
-                    left: '20%',
-                    transform: 'translateY(-50%)',
-                    filter: 'brightness(0.85)',
-                    animationDelay: '0.2s',
-                    rotate: '-15deg'
-                  }}
-                />
+              {/* Left Background Lighter */}
+              <motion.img
+                src={hero2}
+                alt="Beaded lighter case"
+                className="absolute w-24 md:w-32 lg:w-40 h-auto object-contain blur-[2px] opacity-60"
+                style={{
+                  left: '15%',
+                  top: '51%',
+                  x: '-15%',
+                  y: '-50%',
+                  rotate: -15,
+                  filter: 'brightness(0.85)'
+                }}
+                animate={{
+                  y: ['-50%', '-55%', '-50%']
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
 
-                {/* Right Background Lighter */}
-                <img
-                  src={hero3}
-                  alt="Handmade beaded lighter case"
-                  className="absolute w-24 md:w-32 lg:w-40 h-auto object-contain opacity-60 blur-sm animate-float"
-                  style={{
-                    right: '20%',
-                    transform: 'translateY(-50%)',
-                    filter: 'brightness(0.85)',
-                    animationDelay: '0.4s',
-                    rotate: '15deg'
-                  }}
-                />
-              </div>
+              {/* Right Background Lighter */}
+              <motion.img
+                src={hero3}
+                alt="Beaded lighter case"
+                className="absolute w-24 md:w-32 lg:w-40 h-auto object-contain blur-[2px] opacity-60"
+                style={{
+                  right: '15%',
+                  top: '50%',
+                  x: '15%',
+                  y: '-50%',
+                  rotate: 15,
+                  filter: 'brightness(0.85)'
+                }}
+                animate={{
+                  y: ['-50%', '-55%', '-50%']
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
 
               {/* Main Front Lighter */}
-              <div className="relative flex justify-center">
-                <img
-                  src={hero1}
-                  alt="Handmade beaded lighter case with traditional Native American patterns"
-                  className="relative w-32 md:w-40 lg:w-48 h-auto object-contain animate-float drop-shadow-2xl z-10"
-                />
-              </div>
-
-              {/* Floating Badge - Positioned relative to front lighter */}
-              <div className="absolute bottom-4 left-1/2 translate-x-1/2 bg-card p-4 rounded-lg shadow-medium animate-fade-in z-20" style={{ animationDelay: "0.5s", transform: 'translateX(60%)' }}>
-                <p className="font-display text-2xl font-semibold text-primary">100%</p>
-                <p className="font-body text-sm text-muted-foreground">Handmade</p>
-              </div>
+              <motion.img
+                src={hero1}
+                alt="Primary beaded lighter"
+                className="relative w-32 md:w-40 lg:w-48 h-auto object-contain drop-shadow-2xl z-10"
+                animate={{
+                  y: [0, -15, 0]
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
+            </div> {/* End of aspect-square div */}
+            {/* Floating Badge */}
+            <div className="absolute -bottom-4 -right-4 md:bottom-4 md:-right-8 bg-card p-4 rounded-lg shadow-medium animate-fade-in" style={{ animationDelay: "0.5s" }}>
+              <p className="font-display text-2xl font-semibold text-primary">100%</p>
+              <p className="font-body text-sm text-muted-foreground">Handmade</p>
             </div>
-          </div>
+          </div> {/* End of relative flex-center div */}
         </div>
 
         {/* Scroll Indicator */}

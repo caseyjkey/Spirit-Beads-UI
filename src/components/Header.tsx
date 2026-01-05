@@ -44,7 +44,7 @@ const Header = () => {
           {/* Logo */}
           <a href="/" className="flex items-center gap-2">
             <span className="font-display text-xl md:text-2xl font-semibold text-foreground">
-              Sacred Beads
+              Spirit Beads
             </span>
           </a>
 
