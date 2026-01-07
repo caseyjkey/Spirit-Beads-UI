@@ -22,7 +22,7 @@ const Index = () => {
   return (
     <>
       <Helmet>
-        <title>SpiritBeads | Handcrafted Native American Beaded Lighter Cases</title>
+        <title>Spirit Beads | Handcrafted Native American Beaded Lighter Cases</title>
         <meta
           name="description"
           content="Shop unique handmade beaded lighter cases crafted by a Native American artisan. Each piece features traditional beadwork patterns. Support Indigenous-owned business."

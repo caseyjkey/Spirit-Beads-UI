@@ -18,12 +18,15 @@ import { Loader2 } from "lucide-react";
 
 const CartSheet = () => {
   const { items, removeItem, itemCount, updateQuantity } = useCart();
-  const { cartItemsWithPricing, loading, error: pricingError, subtotal } = useCartPricing();
+  const { cartItemsWithPricing, loading, error: pricingError, subtotal, hasOutOfStockItems } = useCartPricing();
   const { checkout, isLoading, error, setError } = useCheckout();
   const [showCheckoutError, setShowCheckoutError] = useState(false);
   const [localCheckoutError, setLocalCheckoutError] = useState<CheckoutError | null>(null);
 
   const formatPrice = (cents: number) => {
+    if (isNaN(cents) || !isFinite(cents)) {
+      return '$0';
+    }
     return `$${Math.floor(cents / 100)}`;
   };
 
@@ -97,12 +100,16 @@ const CartSheet = () => {
               Add some unique pieces to get started
             </p>
           </div>
+        ) : pricingError ? (
+          <div className="bg-destructive/10 border border-destructive/20 rounded-md p-3">
+            <p className="text-sm text-destructive">{pricingError}</p>
+          </div>
         ) : (
           <>
             <div className="flex-1 overflow-auto py-4">
               <div className="space-y-4">
                 {cartItemsWithPricing.map((item) => (
-                  <div key={item.cartId} className="flex gap-4">
+                  <CartItemRow key={`${item.cartId}-${item.id}-${item.quantity}`} className="flex gap-4">
                     <div className="w-20 h-24 bg-secondary rounded-md overflow-hidden flex-shrink-0">
                       <img
                         src={getImageUrl(item.image || '/placeholder-product.jpg')}
@@ -115,25 +122,28 @@ const CartSheet = () => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="font-display font-medium text-foreground truncate">
-                        {item.name}
+                        {item.name || 'Unnamed Product'}
                       </h4>
-                      <p className="font-body text-primary font-semibold mt-1">
+                      <p className="font-body text-primary font-semibold mt-1 block">
                         {formatPrice(item.price)}
                       </p>
-                      {item.inventory_count > 1 && (
-                        <div className="mt-2">
-                          <QuantitySelector
-                            quantity={item.quantity}
-                            maxQuantity={item.inventory_count}
-                            onQuantityChange={(newQuantity) => handleQuantityChange(item.cartId, newQuantity)}
-                            size="sm"
-                          />
-                        </div>
-                      )}
+                      <p className="font-body text-sm text-muted-foreground mt-1">
+                        {item.pattern_display || 'Custom Pattern'}
+                      </p>
                       {item.inventory_count <= 1 && (
                         <p className="font-body text-xs text-muted-foreground mt-2">
                           Quantity: {item.quantity}
                         </p>
+                      )}
+                      {(item.is_sold_out || item.inventory_count === 0) && (
+                        <div className="mt-2 p-2 bg-destructive/10 border border-destructive/20 rounded">
+                          <p className="text-sm text-destructive font-medium">
+                            {item.is_sold_out ? 'Sold Out' : 'Out of Stock'}
+                          </p>
+                          <p className="text-xs text-destructive mt-1">
+                            This item is no longer available for purchase
+                          </p>
+                        </div>
                       )}
                     </div>
                     <Button
@@ -141,6 +151,7 @@ const CartSheet = () => {
                       size="icon"
                       onClick={() => removeItem(item.cartId)}
                       className="text-muted-foreground hover:text-destructive flex-shrink-0"
+                      disabled={item.is_sold_out || item.inventory_count === 0}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -150,11 +161,6 @@ const CartSheet = () => {
             </div>
 
             <div className="border-t border-border pt-4 space-y-4">
-              {pricingError && (
-                <div className="bg-destructive/10 border border-destructive/20 rounded-md p-3">
-                  <p className="text-sm text-destructive">{pricingError}</p>
-                </div>
-              )}
               {localCheckoutError && showCheckoutError && (
                 <CheckoutErrorDisplay
                   error={localCheckoutError}
@@ -177,7 +183,7 @@ const CartSheet = () => {
                 className="w-full transition-all duration-100"
                 size="lg"
                 onClick={handleCheckout}
-                disabled={isLoading}
+                disabled={isLoading || hasOutOfStockItems}
               >
                 Checkout
               </Button>
@@ -188,7 +194,7 @@ const CartSheet = () => {
           </>
         )}
       </SheetContent>
-    </Sheet>
+    </Sheet >
   );
 };
 

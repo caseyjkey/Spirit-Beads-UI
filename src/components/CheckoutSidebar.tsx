@@ -130,6 +130,9 @@ export const CheckoutSidebar = ({ isOpen, onClose }: CheckoutSidebarProps) => {
   }, [isOpen]);
 
   const formatPrice = (cents: number) => {
+    if (isNaN(cents) || !isFinite(cents)) {
+      return '$0';
+    }
     return `$${Math.floor(cents / 100)}`;
   };
 

@@ -52,9 +52,28 @@ class ApiClient {
     }
   }
 
-  async getProducts(): Promise<Product[]> {
-    const response = await this.request<{results: Product[]}>('/products/');
-    return response.results;
+  async getProducts(page: number = 1, pageSize: number = 24, lighterType?: number): Promise<{
+    results: Product[];
+    count: number;
+    next: string | null;
+    previous: string | null;
+  }> {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      page_size: pageSize.toString(),
+      ...(lighterType && { lighter_type: lighterType.toString() }),
+    });
+    return this.request(`/products/?${params}`);
+  }
+
+  async getBatchProducts(ids: string[]): Promise<{
+    products: Product[];
+    count: number;
+  }> {
+    const params = new URLSearchParams({
+      ids: ids.join(','),
+    });
+    return this.request(`/products/batch/?${params}`);
   }
 
   async getProduct(slug: string): Promise<Product> {

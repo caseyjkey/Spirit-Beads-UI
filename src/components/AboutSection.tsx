@@ -36,7 +36,7 @@ const AboutSection = () => {
 
             <div className="space-y-4 font-body text-muted-foreground">
               <p>
-                SpiritBeads was born from a deep passion for traditional Native American
+                Spirit Beads was born from a deep passion for traditional Native American
                 beadwork and a desire to share this beautiful art form with the world.
               </p>
               <p>
@@ -46,7 +46,7 @@ const AboutSection = () => {
                 that connects all living things.
               </p>
               <p>
-                When you purchase from SpiritBeads, you're not just buying a product.
+                When you purchase from Spirit Beads, you're not just buying a product.
                 You're supporting Indigenous artistry, helping preserve cultural traditions,
                 and carrying a piece of handmade history with you.
               </p>

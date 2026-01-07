@@ -8,19 +8,7 @@ import thread from "@/assets/hero/thread.png";
 
 const Hero = () => {
   return (
-    <section className="relative min-h-screen flex items-center justify-center bg-gradient-hero overflow-hidden pt-16">
-      {/* Thread Background - Full Hero Section */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <img
-          src={thread}
-          alt="Traditional beadwork thread and needle"
-          className="absolute w-4/5 h-4/5 object-contain opacity-20"
-          style={{
-            transform: 'rotate(-5deg)'
-          }}
-        />
-      </div>
-
+    <section className="relative min-h-screen flex items-center justify-center bg-gradient-hero overflow-hidden pt-16 pb-20">
       {/* Decorative Pattern */}
       <div className="absolute inset-0 opacity-5">
         <div
@@ -82,7 +70,6 @@ const Hero = () => {
           </div>
 
           {/* Hero Image Cluster */}
-          {/* Hero Image Cluster */}
           <div className="relative order-1 md:order-2 flex justify-center">
             <div className="relative w-full max-w-md lg:max-w-xl aspect-square flex items-center justify-center">
               {/* Glow Effect */}
@@ -92,7 +79,7 @@ const Hero = () => {
               <motion.img
                 src={hero2}
                 alt="Beaded lighter case"
-                className="absolute w-24 md:w-32 lg:w-40 h-auto object-contain blur-[2px] opacity-60"
+                className="absolute w-32 md:w-40 lg:w-48 h-auto object-contain blur-[2px] opacity-60"
                 style={{
                   left: '15%',
                   top: '51%',
@@ -115,7 +102,7 @@ const Hero = () => {
               <motion.img
                 src={hero3}
                 alt="Beaded lighter case"
-                className="absolute w-24 md:w-32 lg:w-40 h-auto object-contain blur-[2px] opacity-60"
+                className="absolute w-32 md:w-40 lg:w-48 h-auto object-contain blur-[2px] opacity-60"
                 style={{
                   right: '15%',
                   top: '50%',
@@ -138,7 +125,7 @@ const Hero = () => {
               <motion.img
                 src={hero1}
                 alt="Primary beaded lighter"
-                className="relative w-32 md:w-40 lg:w-48 h-auto object-contain drop-shadow-2xl z-10"
+                className="relative w-40 md:w-48 lg:w-56 h-auto object-contain drop-shadow-2xl z-10"
                 animate={{
                   y: [0, -15, 0]
                 }}
@@ -148,9 +135,33 @@ const Hero = () => {
                   ease: "easeInOut"
                 }}
               />
+
+              {/* Thread Image - Desktop: Lower Right */}
+              <img
+                src={thread}
+                alt="Traditional beadwork thread and needle"
+                className="hidden md:block absolute w-1/2 h-1/2 object-contain opacity-10"
+                style={{
+                  right: '-10%',
+                  bottom: '-20%',
+                  transform: 'rotate(-5deg)'
+                }}
+              />
+
+              {/* Thread Image - Mobile: Bottom Center */}
+              <img
+                src={thread}
+                alt="Traditional beadwork thread and needle"
+                className="md:hidden absolute w-1/2 h-1/2 object-contain opacity-10"
+                style={{
+                  left: '50%',
+                  bottom: '0%',
+                  transform: 'translateX(-50%) rotate(-5deg)'
+                }}
+              />
             </div> {/* End of aspect-square div */}
             {/* Floating Badge */}
-            <div className="absolute -bottom-4 -right-4 md:bottom-4 md:-right-8 bg-card p-4 rounded-lg shadow-medium animate-fade-in" style={{ animationDelay: "0.5s" }}>
+            <div className="hidden md:block absolute bottom-4 left-1/2 bg-card p-4 rounded-lg shadow-medium animate-fade-in z-20" style={{ animationDelay: "0.5s", transform: 'translateX(-50%) translateX(50px) translateY(-80px)' }}>
               <p className="font-display text-2xl font-semibold text-primary">100%</p>
               <p className="font-body text-sm text-muted-foreground">Handmade</p>
             </div>
