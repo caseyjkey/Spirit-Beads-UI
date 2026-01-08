@@ -1,6 +1,7 @@
 import { memo, useEffect, useRef } from "react";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast-custom";
+import { getMediaBaseUrl } from "@/lib/api";
 import { Check } from "lucide-react";
 
 interface ProductCardProps {
@@ -45,9 +46,7 @@ const ProductCard = memo(({ id, name, price, image, pattern, lighterType, isSold
       return imageSrc;
     }
     if (imageSrc.startsWith('/media/')) {
-      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://spirit-beads.keycasey.com/api';
-      const mediaBaseUrl = baseUrl.replace('/api', '');
-      return `${mediaBaseUrl}${imageSrc}`;
+      return `${getMediaBaseUrl()}${imageSrc}`;
     }
     return imageSrc;
   };

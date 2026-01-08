@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/use-cart";
 import { useCartPricing } from "@/hooks/use-cart-pricing";
 import { useCheckout, CheckoutError } from "@/hooks/use-checkout";
+import { getMediaBaseUrl } from "@/lib/api";
 import { Separator } from "@/components/ui/separator";
 import { QuantitySelector } from "@/components/ui/quantity-selector";
 import { CheckoutErrorDisplay } from "@/components/ui/checkout-error-display";
@@ -141,9 +142,7 @@ export const CheckoutSidebar = ({ isOpen, onClose }: CheckoutSidebarProps) => {
       return imageSrc;
     }
     if (imageSrc.startsWith('/media/')) {
-      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://spirit-beads.keycasey.com/api';
-      const mediaBaseUrl = baseUrl.replace('/api', '');
-      return `${mediaBaseUrl}${imageSrc}`;
+      return `${getMediaBaseUrl()}${imageSrc}`;
     }
     return imageSrc;
   };
@@ -182,10 +181,10 @@ export const CheckoutSidebar = ({ isOpen, onClose }: CheckoutSidebarProps) => {
     <>
       {/* Checkout Sidebar */}
       <div
-        className={`checkout-sidebar fixed right-0 top-16 md:top-20 h-[calc(100vh-4rem)] md:h-[calc(100vh-5rem)] w-[400px] bg-white shadow-2xl z-[160] flex flex-col${isVisible ? " is-open" : ""}`}
+        className={`checkout-sidebar fixed right-0 top-16 md:top-20 h-[calc(100vh-4rem)] md:h-[calc(100vh-5rem)] w-full max-w-[400px] bg-white shadow-2xl z-[160] flex flex-col overflow-hidden${isVisible ? " is-open" : ""}`}
       >
         {/* Header with Close Button */}
-        <div className="relative flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="relative flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
           <h2 className="text-xl font-display font-semibold">Your Cart</h2>
           <Button
             variant="ghost"
@@ -199,7 +198,7 @@ export const CheckoutSidebar = ({ isOpen, onClose }: CheckoutSidebarProps) => {
 
         {/* Cart Content */}
         {items.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center text-center py-12">
+          <div className="flex-1 flex flex-col items-center justify-center text-center py-8 sm:py-12 px-4">
             <ShoppingBag className="h-16 w-16 text-gray-400 mb-4" />
             <p className="font-body text-gray-500">Your cart is empty</p>
             <p className="font-body text-sm text-gray-400 mt-1">
@@ -209,8 +208,8 @@ export const CheckoutSidebar = ({ isOpen, onClose }: CheckoutSidebarProps) => {
         ) : (
           <>
             {/* Product List */}
-            <div className="flex-1 overflow-auto py-4 max-h-[calc(100vh-16rem)] md:max-h-[calc(100vh-20rem)]">
-              <div className="px-6">
+            <div className="flex-1 overflow-auto py-4 min-h-0">
+              <div className="px-4 sm:px-6">
                 {cartItemsWithPricing.map((item) => (
                   <CartItemRow key={item.cartId} cartId={item.cartId} onRemove={removeItem}>
                     <div className="w-20 h-24 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
@@ -251,16 +250,16 @@ export const CheckoutSidebar = ({ isOpen, onClose }: CheckoutSidebarProps) => {
               </div>
 
               {/* Divider */}
-              <div className="border-t border-gray-100 mx-6 my-4" />
+              <div className="border-t border-gray-100 mx-4 sm:mx-6 my-4" />
 
               {/* Trust Pillars */}
-              <div className="px-6">
+              <div className="px-4 sm:px-6">
                 <TrustPillars />
               </div>
             </div>
 
             {/* Checkout Section - Fixed at bottom */}
-            <div className="border-t border-gray-200 p-6 space-y-4 flex-shrink-0">
+            <div className="border-t border-gray-200 p-4 sm:p-6 space-y-3 sm:space-y-4 flex-shrink-0">
               {pricingError && (
                 <div className="bg-red-50 border border-red-200 rounded-md p-3">
                   <p className="text-sm text-red-600">{pricingError}</p>

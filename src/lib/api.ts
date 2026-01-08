@@ -1,26 +1,44 @@
-// 1. Get the production URL from your .env (VITE_API_URL)
-const PROD_URL = import.meta.env.VITE_API_URL;
+// Production API URL
+const PROD_API_URL = 'https://spirit-beads.keycasey.com/api';
 
-const getApiUrl = () => {
-  // 2. If this is a production build, ALWAYS use the .env domain
+/**
+ * Determines the API base URL based on environment:
+ * - Production build: Uses production URL
+ * - Development on localhost: Uses localhost:8000
+ * - Development on Tailscale IP (100.82.23.47): Uses same IP with port 8000
+ */
+export const getApiBaseUrl = (): string => {
+  // Production build always uses the production URL
   if (import.meta.env.PROD) {
-    return PROD_URL;
+    return PROD_API_URL;
   }
 
-  // 3. If in Development, detect where the user is browsing from:
-  // - If hostname is 'localhost', you are on your Windows PC.
-  // - If hostname is '100.x.x.x', you are on your Phone via Tailscale.
+  // Development: detect where the user is browsing from
   const host = window.location.hostname;
-  
+
+  // Localhost/127.0.0.1 → local backend
   if (host === 'localhost' || host === '127.0.0.1') {
-    return 'http://localhost:8000';
+    return 'http://localhost:8000/api';
   }
 
-  // Fallback: If on your phone, use the same IP address for the backend
-  return `http://${host}:8000`;
+  // Tailscale IP or any other IP → use same IP with port 8000
+  if (host === '100.82.23.47') {
+    return 'http://100.82.23.47:8000/api';
+  }
+
+  // Fallback: use same host with port 8000
+  return `http://${host}:8000/api`;
 };
 
-const API_BASE_URL = getApiUrl();
+/**
+ * Returns the media base URL (without /api suffix) for image URLs
+ */
+export const getMediaBaseUrl = (): string => {
+  const apiUrl = getApiBaseUrl();
+  return apiUrl.replace('/api', '');
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 export interface Product {
   id: number;

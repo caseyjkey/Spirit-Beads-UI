@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useCart } from '@/hooks/use-cart';
+import { getApiBaseUrl } from '@/lib/api';
 
 export interface CheckoutErrorDetail {
   product_id: string;
@@ -29,8 +30,7 @@ export const useCheckout = () => {
         quantity: item.quantity
       }));
 
-      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://spirit-beads.keycasey.com/api';
-      const checkoutUrl = baseUrl.replace('/api', '') + '/api/payments/create-checkout-session/';
+      const checkoutUrl = `${getApiBaseUrl()}/payments/create-checkout-session/`;
 
       const response = await fetch(checkoutUrl, {
         method: 'POST',

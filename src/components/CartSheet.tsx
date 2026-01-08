@@ -11,6 +11,7 @@ import {
 import { useCart } from "@/hooks/use-cart";
 import { useCartPricing } from "@/hooks/use-cart-pricing";
 import { useCheckout, CheckoutError } from "@/hooks/use-checkout";
+import { getMediaBaseUrl } from "@/lib/api";
 import { Separator } from "@/components/ui/separator";
 import { QuantitySelector } from "@/components/ui/quantity-selector";
 import { CheckoutErrorDisplay } from "@/components/ui/checkout-error-display";
@@ -31,17 +32,12 @@ const CartSheet = () => {
   };
 
   const getImageUrl = (imageSrc: string) => {
-    // If it's already a full URL, return as is
     if (imageSrc.startsWith('http')) {
       return imageSrc;
     }
-    // If it's a relative path from Django media, prepend the base API URL (without /api)
     if (imageSrc.startsWith('/media/')) {
-      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://spirit-beads.keycasey.com/api';
-      const mediaBaseUrl = baseUrl.replace('/api', '');
-      return `${mediaBaseUrl}${imageSrc}`;
+      return `${getMediaBaseUrl()}${imageSrc}`;
     }
-    // Otherwise treat as local asset
     return imageSrc;
   };
 
