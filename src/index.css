@@ -607,15 +607,27 @@
     border-color: #4A4A4A;
   }
 
-  /* The Shimmer Animation */
+  /* Shimmer Animation - Left to Right */
   @keyframes shimmer {
     0% {
-      background-position: -468px 0;
+      background-position: -200% 0;
     }
-
     100% {
-      background-position: 468px 0;
+      background-position: 200% 0;
     }
+  }
+
+  .skeleton-shimmer {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--secondary)) 0%,
+      hsl(var(--secondary)) 40%,
+      hsl(var(--secondary) / 0.5) 50%,
+      hsl(var(--secondary)) 60%,
+      hsl(var(--secondary)) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
   }
 
   .skeleton-box {
@@ -776,4 +788,66 @@
       /* Adjust for mobile padding */
     }
   }
+}
+/* Fade out animation for skeleton cross-fade */
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.animate-fade-out {
+  animation: fadeOut 350ms ease-out forwards;
+}
+
+/* Image fade-in animation - pure CSS, no React state */
+@keyframes imageFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-image-fade-in {
+  animation: imageFadeIn 300ms ease-out forwards;
+}
+
+/* Optimize off-screen rendering */
+.content-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 500px;
+}
+
+/* Premium Cross-Fade: Content overlays skeleton */
+
+/* Content layer starts invisible */
+.product-card-content {
+  opacity: 0;
+  transition: opacity 0.4s ease-out;
+}
+
+/* When data is loaded, fade in content over skeleton */
+.product-card.data-loaded .product-card-content {
+  opacity: 1;
+}
+
+/* Stop shimmer animation once data loads */
+.product-card.data-loaded .skeleton-shimmer {
+  animation: none;
+  background: #F4F1ED;
+}
+
+/* Image has separate fade for staggered premium feel */
+.product-card-image {
+  opacity: 0;
+  transition: opacity 0.5s ease-out;
+}
+
+.product-card-image.image-loaded {
+  opacity: 1;
 }

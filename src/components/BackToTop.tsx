@@ -3,54 +3,51 @@ import { motion } from 'framer-motion';
 
 const BackToTop = () => {
     const [isVisible, setIsVisible] = useState(false);
-    const [shouldHideButton, setShouldHideButton] = useState(false);
-    const aboutSectionRef = useRef<HTMLElement | null>(null);
-    const lastVisibilityState = useRef(false);
+    const [isInProductGrid, setIsInProductGrid] = useState(true);
+    const lastIntersectingState = useRef(true);
 
     useEffect(() => {
-        // Find About section element
-        const aboutSection = document.querySelector('#about') as HTMLElement;
-        aboutSectionRef.current = aboutSection;
+        // Find ProductGrid section element
+        const collectionSection = document.querySelector('#collection') as HTMLElement;
 
         const toggleVisibility = () => {
-            if (window.pageYOffset > 400) {
-                setIsVisible(true);
-            } else {
-                setIsVisible(false);
-            }
+            // Show button when scrolled past 400px
+            setIsVisible(window.pageYOffset > 400);
         };
 
-        // Set up Intersection Observer for About section
-        const aboutSectionObserver = new IntersectionObserver(
+        // Set up Intersection Observer for collection section
+        // Button should only show when user is within the ProductGrid section
+        const collectionObserver = new IntersectionObserver(
             (entries) => {
                 const [entry] = entries;
-                const isNowVisible = entry.isIntersecting;
+                const isNowIntersecting = entry.isIntersecting;
 
                 // Only update state if it actually changes to prevent thrashing
-                if (isNowVisible !== lastVisibilityState.current) {
-                    lastVisibilityState.current = isNowVisible;
-                    setShouldHideButton(isNowVisible);
+                if (isNowIntersecting !== lastIntersectingState.current) {
+                    lastIntersectingState.current = isNowIntersecting;
+                    setIsInProductGrid(isNowIntersecting);
                 }
             },
             {
                 root: null,
-                rootMargin: '-30% 0px 0px 0px', // Trigger when 30% from top
-                threshold: [0, 0.1, 0.5] // Multiple thresholds for better detection
+                rootMargin: '0px 0px -10% 0px', // Slight margin at bottom for earlier hide
+                threshold: 0
             }
         );
 
         window.addEventListener('scroll', toggleVisibility, { passive: true });
+        toggleVisibility(); // Initial check
 
-        if (aboutSection) {
-            aboutSectionObserver.observe(aboutSection);
+        if (collectionSection) {
+            collectionObserver.observe(collectionSection);
         }
 
         return () => {
             window.removeEventListener('scroll', toggleVisibility);
-            if (aboutSection) {
-                aboutSectionObserver.unobserve(aboutSection);
+            if (collectionSection) {
+                collectionObserver.unobserve(collectionSection);
             }
-            aboutSectionObserver.disconnect();
+            collectionObserver.disconnect();
         };
     }, []);
 
@@ -61,30 +58,21 @@ const BackToTop = () => {
         });
     };
 
-    // Position button relative to the products section, not viewport
-    const buttonStyle = {
-        position: 'fixed' as const,
-        bottom: '2rem',
-        right: '2rem',
-        maxWidth: 'calc(100vw - 2rem)' // Ensure button doesn't overflow on small screens
-    };
-
-    // Combined visibility state: hide when About section is visible or when not scrolled enough
-    const shouldBeVisible = isVisible && !shouldHideButton;
+    // Combined visibility: show only when scrolled enough AND within ProductGrid bounds
+    const shouldBeVisible = isVisible && isInProductGrid;
 
     return (
         <motion.button
             onClick={scrollToTop}
-            className="p-3 rounded-full shadow-lg transition-all duration-300 z-[60] bg-primary text-primary-foreground hover:bg-primary/90"
-            style={buttonStyle}
-            initial={{ opacity: 0, scale: 0 }}
+            className="fixed bottom-8 right-8 p-3 rounded-full shadow-lg z-[60] bg-primary text-primary-foreground hover:bg-primary/90"
+            style={{ pointerEvents: shouldBeVisible ? 'auto' : 'none' }}
+            initial={{ opacity: 0 }}
             animate={{
                 opacity: shouldBeVisible ? 1 : 0,
-                scale: shouldBeVisible ? 1 : 0,
-                transition: { duration: 0.3, ease: "easeInOut" }
             }}
-            whileHover={{ scale: shouldBeVisible ? 1.1 : 1 }}
-            whileTap={{ scale: shouldBeVisible ? 0.95 : 1 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
             aria-label="Back to top"
         >
             <svg

@@ -1,22 +1,35 @@
-import { motion } from 'framer-motion';
+interface SkeletonCardProps {
+    /** When true, renders without framer-motion animation (for use in crossfade overlay) */
+    static?: boolean;
+}
 
-const SkeletonCard = () => {
-    return (
-        <motion.div
-            className="space-y-4 border-2 border-red-500 bg-white p-4 rounded-lg" // Added background and padding
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-        >
-            {/* Skeleton Image */}
-            <div className="skeleton-box skeleton-image" />
+const SkeletonCard = ({ static: isStatic = false }: SkeletonCardProps) => {
+    const content = (
+        <>
+            {/* Skeleton Image - matches ProductCard aspect ratio 4/5 with shimmer */}
+            <div className="skeleton-shimmer" style={{ aspectRatio: '4 / 5' }} />
 
-            {/* Skeleton Text */}
-            <div className="space-y-2">
-                <div className="skeleton-box skeleton-text" />
-                <div className="skeleton-box skeleton-price" />
+            {/* Skeleton Text - matches ProductCard p-4 spacing */}
+            <div className="p-4 space-y-2">
+                <div className="h-3 w-16 skeleton-shimmer rounded" />
+                <div className="h-5 w-3/4 skeleton-shimmer rounded" />
+                <div className="h-5 w-20 skeleton-shimmer rounded" />
             </div>
-        </motion.div>
+        </>
+    );
+
+    if (isStatic) {
+        return (
+            <div className="bg-card rounded-lg overflow-hidden shadow-soft h-full">
+                {content}
+            </div>
+        );
+    }
+
+    return (
+        <div className="bg-card rounded-lg overflow-hidden shadow-soft">
+            {content}
+        </div>
     );
 };
 

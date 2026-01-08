@@ -8,7 +8,7 @@ import thread from "@/assets/hero/thread.png";
 
 const Hero = () => {
   return (
-    <section className="relative min-h-screen flex items-center justify-center bg-gradient-hero overflow-hidden pt-16 pb-20">
+    <section className="relative min-h-screen md:min-h-0 md:h-[calc(100vh-2rem)] flex items-center justify-center bg-gradient-hero overflow-hidden pt-16 md:pt-20 pb-20 md:pb-8">
       {/* Decorative Pattern */}
       <div className="absolute inset-0 opacity-5">
         <div
