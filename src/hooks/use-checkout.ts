@@ -32,12 +32,19 @@ export const useCheckout = () => {
 
       const checkoutUrl = `${getApiBaseUrl()}/payments/create-checkout-session/`;
 
+      // Send the frontend origin so backend can construct correct redirect URLs
+      const frontendOrigin = window.location.origin;
+
       const response = await fetch(checkoutUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ items: apiItems }),
+        body: JSON.stringify({
+          items: apiItems,
+          success_url: `${frontendOrigin}/checkout/success`,
+          cancel_url: `${frontendOrigin}/checkout/cancel`,
+        }),
       });
 
       if (!response.ok) {
