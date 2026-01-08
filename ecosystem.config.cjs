@@ -2,7 +2,7 @@ module.exports = {
   apps: [{
     name: 'spirit-bead-designs',
     script: 'bun',
-    args: 'dev',
+    args: 'src/index.ts',
     cwd: '/var/www/spirit-bead-designs',
     instances: 1,
     autorestart: true,

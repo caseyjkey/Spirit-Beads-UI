@@ -1,4 +1,26 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://spirit-beads.keycasey.com/api';
+// 1. Get the production URL from your .env (VITE_API_URL)
+const PROD_URL = import.meta.env.VITE_API_URL;
+
+const getApiUrl = () => {
+  // 2. If this is a production build, ALWAYS use the .env domain
+  if (import.meta.env.PROD) {
+    return PROD_URL;
+  }
+
+  // 3. If in Development, detect where the user is browsing from:
+  // - If hostname is 'localhost', you are on your Windows PC.
+  // - If hostname is '100.x.x.x', you are on your Phone via Tailscale.
+  const host = window.location.hostname;
+  
+  if (host === 'localhost' || host === '127.0.0.1') {
+    return 'http://localhost:8000';
+  }
+
+  // Fallback: If on your phone, use the same IP address for the backend
+  return `http://${host}:8000`;
+};
+
+const API_BASE_URL = getApiUrl();
 
 export interface Product {
   id: number;
