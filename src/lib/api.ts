@@ -8,10 +8,6 @@ const PROD_API_URL = 'https://spirit-beads.keycasey.com/api';
  * - Development on Tailscale IP (100.82.23.47): Uses same IP with port 8000
  */
 export const getApiBaseUrl = (): string => {
-  // Debug: Log environment variables
-  console.log('import.meta.env.MODE:', import.meta.env.MODE);
-  console.log('import.meta.env.PROD:', import.meta.env.PROD);
-  console.log('import.meta.env.DEV:', import.meta.env.DEV);
   
   // Production build always uses the production URL
   if (import.meta.env.PROD) {
@@ -50,8 +46,6 @@ export interface Product {
   id: number;
   name: string;
   slug: string;
-  pattern: string;
-  pattern_display: string;
   lighter_type: string;
   lighter_type_display: string;
   price: number;
@@ -63,6 +57,7 @@ export interface Product {
   primary_image?: string;
   is_in_stock: boolean;
   category?: string;
+  category_name?: string;
   created_at: string;
   updated_at: string;
 }
@@ -98,7 +93,7 @@ class ApiClient {
     }
   }
 
-  async getProducts(page: number = 1, pageSize: number = 24, lighterType?: number): Promise<{
+  async getProducts(page: number = 1, pageSize: number = 24, lighterType?: number, category?: number): Promise<{
     results: Product[];
     count: number;
     next: string | null;
@@ -108,6 +103,7 @@ class ApiClient {
       page: page.toString(),
       page_size: pageSize.toString(),
       ...(lighterType && { lighter_type: lighterType.toString() }),
+      ...(category && { category: category.toString() }),
     });
     return this.request(`/products/?${params}`);
   }
@@ -126,8 +122,18 @@ class ApiClient {
     return this.request<Product>(`/products/${slug}/`);
   }
 
-  async getCategories(): Promise<Category[]> {
-    return this.request<Category[]>('/categories/');
+  async getCategories(): Promise<{
+    results: Category[];
+    count: number;
+    next: string | null;
+    previous: string | null;
+  }> {
+    return this.request<{
+      results: Category[];
+      count: number;
+      next: string | null;
+      previous: string | null;
+    }>('/categories/');
   }
 
   async checkProductAvailability(id: number): Promise<{

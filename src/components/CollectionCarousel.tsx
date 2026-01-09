@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 interface Collection {
+    id: number;
     slug: string;
     name: string;
 }
@@ -9,7 +10,7 @@ interface Collection {
 interface CollectionCarouselProps {
     collections: Collection[];
     activeCollection: string;
-    onCollectionChange: (collection: string) => void;
+    onCollectionChange: (collection: string, id?: number) => void;
 }
 
 const CollectionCarousel: React.FC<CollectionCarouselProps> = ({
@@ -17,6 +18,9 @@ const CollectionCarousel: React.FC<CollectionCarouselProps> = ({
     activeCollection,
     onCollectionChange
 }) => {
+    // Ensure collections is always an array to prevent map errors
+    const safeCollections = Array.isArray(collections) ? collections : [];
+
     return (
         <div className="collection-carousel-container">
             <div className="collection-carousel-wrapper">
@@ -29,11 +33,11 @@ const CollectionCarousel: React.FC<CollectionCarouselProps> = ({
                 >
                     All Collections
                 </motion.button>
-                {collections.map((collection) => (
+                {safeCollections.map((collection) => (
                     <motion.button
-                        key={collection.slug}
+                        key={collection.id}
                         className={`collection-pill ${activeCollection === collection.slug ? 'active' : ''}`}
-                        onClick={() => onCollectionChange(collection.slug)}
+                        onClick={() => onCollectionChange(collection.slug, collection.id)}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         transition={{ type: "spring", stiffness: 400, damping: 17 }}

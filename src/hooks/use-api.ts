@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { apiClient, Product } from '@/lib/api';
+import { apiClient, Product, Category } from '@/lib/api';
 
 // Minimum time (ms) to show skeleton loading state for a premium feel
 const SKELETON_MIN_DISPLAY_TIME = 800;
@@ -25,6 +25,7 @@ export const useProducts = () => {
   const [skeletonCount, setSkeletonCount] = useState(0);
   const [filteredCount, setFilteredCount] = useState(0);
   const [activeLighterType, setActiveLighterType] = useState<number | undefined>(undefined);
+  const [activeCategory, setActiveCategory] = useState<number | undefined>(undefined);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const loadingStartTimeRef = useRef<number>(0);
@@ -39,8 +40,8 @@ export const useProducts = () => {
   // Ref to track if we're currently loading to prevent race conditions
   const isLoadingRef = useRef(false);
 
-  const loadMoreProducts = useCallback(async (pageNum: number = 1, lighterType?: number) => {
-    log(`📥 loadMoreProducts called - page: ${pageNum}, lighterType: ${lighterType}, scrollY: ${window.scrollY}, isLoadingRef: ${isLoadingRef.current}`);
+  const loadMoreProducts = useCallback(async (pageNum: number = 1, lighterType?: number, category?: number) => {
+    log(`📥 loadMoreProducts called - page: ${pageNum}, lighterType: ${lighterType}, category: ${category}, scrollY: ${window.scrollY}, isLoadingRef: ${isLoadingRef.current}`);
 
     // Prevent concurrent loads - if we're already loading, skip this request
     // Exception: page 1 always takes priority (filter change)
@@ -70,7 +71,7 @@ export const useProducts = () => {
       }
 
       log(`📥 Fetching products from API...`);
-      const response = await apiClient.getProducts(pageNum, BATCH_SIZE, lighterType);
+      const response = await apiClient.getProducts(pageNum, BATCH_SIZE, lighterType, category);
       log(`📥 API response received - ${response.results.length} products, hasMore: ${response.next !== null}`);
 
       // Calculate how long we've been loading
@@ -130,14 +131,14 @@ export const useProducts = () => {
   }, []);
 
   useEffect(() => {
-    loadMoreProducts(1, activeLighterType);
-  }, [loadMoreProducts, activeLighterType]);
+    loadMoreProducts(1, activeLighterType, activeCategory);
+  }, [loadMoreProducts, activeLighterType, activeCategory]);
 
   useEffect(() => {
     if (page > 1) {
-      loadMoreProducts(page, activeLighterType);
+      loadMoreProducts(page, activeLighterType, activeCategory);
     }
-  }, [page, loadMoreProducts, activeLighterType]);
+  }, [page, loadMoreProducts, activeLighterType, activeCategory]);
 
   // Update skeleton count when products change and we're loading more
   useEffect(() => {
@@ -225,6 +226,8 @@ export const useProducts = () => {
     setFilteredCount,
     activeLighterType,
     setActiveLighterType,
+    activeCategory,
+    setActiveCategory,
     setPage,
     setProducts,
     setHasMore,
@@ -238,6 +241,34 @@ export const useProducts = () => {
       loadMoreProducts(1);
     }
   };
+};
+
+export const useCategories = () => {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setLoading(true);
+        const data = await apiClient.getCategories();
+        // Extract the results array from paginated response
+        const categoriesArray = data.results || data;
+        setCategories(categoriesArray);
+        setError(null);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch categories');
+        console.error('Error fetching categories:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  return { categories, loading, error };
 };
 
 export const useProduct = (slug: string) => {

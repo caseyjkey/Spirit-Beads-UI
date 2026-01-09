@@ -3,21 +3,14 @@ import CustomOrderDialog from "./CustomOrderDialog";
 import CollectionCarousel from "./CollectionCarousel";
 import SizeFilter from "./SizeFilter";
 import SkeletonCard from "./SkeletonCard";
-import { useProducts } from "@/hooks/use-api";
+import { useProducts, useCategories } from "@/hooks/use-api";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import BackToTop from "./BackToTop";
 
-// Define boutique categories
-const BOUTIQUE_CATEGORIES = [
-  { slug: 'ancestral-motifs', name: 'Ancestral Motifs' },
-  { slug: 'infinite-path', name: 'Infinite Path' },
-  { slug: 'traditional-rhythms', name: 'Traditional Rhythms' },
-  { slug: 'earths-hue', name: 'Earth\'s Hue' },
-];
-
 const ProductGrid = () => {
-  const { products, loading, loadingMore, showSkeletons, error, hasMore, skeletonCount, setupObserver, activeLighterType, setActiveLighterType, setPage, setProducts, setHasMore } = useProducts();
+  const { products, loading, loadingMore, showSkeletons, error, hasMore, skeletonCount, filteredCount, setFilteredCount, activeLighterType, setActiveLighterType, activeCategory, setActiveCategory, setupObserver, setPage, setProducts, setHasMore } = useProducts();
+  const { categories, loading: categoriesLoading } = useCategories();
   const [activeCollection, setActiveCollection] = useState('all');
   const [activeSize, setActiveSize] = useState('all');
   const carouselRef = useRef<HTMLDivElement>(null);
@@ -40,7 +33,21 @@ const ProductGrid = () => {
     setHasMore(true); // Reset pagination
   };
 
-  
+  // Handle collection/category changes
+  const handleCollectionChange = (collectionSlug: string, categoryId?: number) => {
+    setActiveCollection(collectionSlug);
+    if (categoryId) {
+      setActiveCategory(categoryId);
+    } else {
+      setActiveCategory(undefined);
+    }
+    // Reset to page 1 and clear existing products when category changes
+    setPage(1);
+    setProducts([]);
+    setHasMore(true);
+  };
+
+
   // Check if carousel is scrolled to end for fade effect
   const [isAtEnd, setIsAtEnd] = useState(false);
 
@@ -62,18 +69,10 @@ const ProductGrid = () => {
   }, [activeCollection]);
 
   const filteredProducts = useMemo(() => {
-    let filtered = products;
-
-    // Filter by collection (still client-side since collection filtering isn't implemented in API yet)
-    if (activeCollection !== 'all') {
-      filtered = filtered.filter(p => p.category === activeCollection);
-    }
-
-    // Note: Size filtering is now handled server-side via API lighter_type parameter
-    // Classic BIC: lighter_type=1, Mini BIC: lighter_type=2
-    return filtered;
-  }, [activeCollection, products]);
-
+    // Category filtering is now handled server-side via API category parameter
+    // No client-side filtering needed
+    return products;
+  }, [products]);
 
   if (error) {
     return (
@@ -105,9 +104,9 @@ const ProductGrid = () => {
           className={`collection-carousel-container ${isAtEnd ? 'at-end' : ''}`}
         >
           <CollectionCarousel
-            collections={BOUTIQUE_CATEGORIES}
+            collections={categories}
             activeCollection={activeCollection}
-            onCollectionChange={setActiveCollection}
+            onCollectionChange={handleCollectionChange}
           />
         </div>
 
@@ -147,7 +146,7 @@ const ProductGrid = () => {
                   name={product.name}
                   price={product.price}
                   image={product.primary_image || '/placeholder-product.jpg'}
-                  pattern={product.pattern_display}
+                  categoryName={product.category_name}
                   lighterType={product.lighter_type_display}
                   isSoldOut={product.is_sold_out}
                 />

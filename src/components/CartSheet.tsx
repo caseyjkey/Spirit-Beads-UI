@@ -105,7 +105,7 @@ const CartSheet = () => {
             <div className="flex-1 overflow-auto py-4">
               <div className="space-y-4">
                 {cartItemsWithPricing.map((item) => (
-                  <CartItemRow key={`${item.cartId}-${item.id}-${item.quantity}`} className="flex gap-4">
+                  <div key={`${item.cartId}-${item.id}-${item.quantity}`} className="flex gap-4">
                     <div className="w-20 h-24 bg-secondary rounded-md overflow-hidden flex-shrink-0">
                       <img
                         src={getImageUrl(item.image || '/placeholder-product.jpg')}
@@ -124,7 +124,7 @@ const CartSheet = () => {
                         {formatPrice(item.price)}
                       </p>
                       <p className="font-body text-sm text-muted-foreground mt-1">
-                        {item.pattern_display || 'Custom Pattern'}
+                        {item.category_name || 'Custom Design'}
                       </p>
                       {item.inventory_count <= 1 && (
                         <p className="font-body text-xs text-muted-foreground mt-2">
@@ -179,7 +179,7 @@ const CartSheet = () => {
                 className="w-full transition-all duration-100"
                 size="lg"
                 onClick={handleCheckout}
-                disabled={isLoading || hasOutOfStockItems}
+                disabled={isLoading || hasOutOfStockItems ? true : false}
               >
                 Checkout
               </Button>

@@ -9,12 +9,12 @@ interface ProductCardProps {
   name: string;
   price: number | string;
   image: string;
-  pattern: string;
+  categoryName?: string;
   lighterType?: string;
   isSoldOut?: boolean;
 }
 
-const ProductCard = memo(({ id, name, price, image, pattern, lighterType, isSoldOut = false }: ProductCardProps) => {
+const ProductCard = memo(({ id, name, price, image, categoryName, lighterType, isSoldOut = false }: ProductCardProps) => {
   const { addItem, isInCart } = useCart();
   const { showToast } = useToast();
   const itemId = String(id);
@@ -72,7 +72,7 @@ const ProductCard = memo(({ id, name, price, image, pattern, lighterType, isSold
         <div className="relative overflow-hidden" style={{ backgroundColor: '#F4F1ED', aspectRatio: '4 / 5' }}>
           <img
             src={getImageUrl(image)}
-            alt={`${name} - ${pattern} beaded lighter case`}
+            alt={`${name} - ${categoryName || 'beaded lighter case'}`}
             loading="lazy"
             decoding="async"
             className="product-card-image w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
@@ -105,7 +105,7 @@ const ProductCard = memo(({ id, name, price, image, pattern, lighterType, isSold
         {/* Product Info */}
         <div className="p-4 bg-card">
           <p className="font-body text-xs uppercase tracking-wider text-accent mb-1">
-            {pattern}
+            {categoryName}
           </p>
           <h3 className="font-display text-lg font-medium text-foreground mb-2">
             {name}

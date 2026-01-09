@@ -58,7 +58,7 @@ export const useCartPricing = () => {
               name: product.name,
               price: product.price,
               image: product.primary_image || cartItem.image,
-              pattern_display: product.pattern_display,
+              category_name: product.category_name,
               is_sold_out: product.is_sold_out,
               inventory_count: product.inventory_count,
               is_in_stock: product.is_in_stock,
