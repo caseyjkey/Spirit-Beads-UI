@@ -9,9 +9,6 @@ module.exports = {
     watch: false,
     max_memory_restart: '1G',
     env: {
-      NODE_ENV: 'development'
-    },
-    env_production: {
       NODE_ENV: 'production'
     },
     log_file: '/var/www/spirit-bead-designs/logs/combined.log',
