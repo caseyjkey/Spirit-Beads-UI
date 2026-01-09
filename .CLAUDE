@@ -1,0 +1,8 @@
+<purpose>
+This is a botique ecommerce shop for an indigenous artist selling handcrafted beaded lighter cases.
+Maintain a professional, high-quality aesthetic throughout the site.
+</purpose>
+<development>
+This site uses `bun` for it's runtime, use `bun dev` and `bun run build` when needed.
+</development>
+

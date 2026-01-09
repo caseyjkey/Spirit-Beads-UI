@@ -19,6 +19,7 @@ export default defineConfig(({ mode }) => ({
   define: {
     // Ensure production mode is set correctly
     'import.meta.env.PROD': mode === 'production',
+    'import.meta.env.DEV': mode !== 'production',
     'import.meta.env.MODE': JSON.stringify(mode),
   },
 }));
