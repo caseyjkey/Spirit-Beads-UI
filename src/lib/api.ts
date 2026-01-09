@@ -8,6 +8,11 @@ const PROD_API_URL = 'https://spirit-beads.keycasey.com/api';
  * - Development on Tailscale IP (100.82.23.47): Uses same IP with port 8000
  */
 export const getApiBaseUrl = (): string => {
+  // Debug: Log environment variables
+  console.log('import.meta.env.MODE:', import.meta.env.MODE);
+  console.log('import.meta.env.PROD:', import.meta.env.PROD);
+  console.log('import.meta.env.DEV:', import.meta.env.DEV);
+  
   // Production build always uses the production URL
   if (import.meta.env.PROD) {
     return PROD_API_URL;
