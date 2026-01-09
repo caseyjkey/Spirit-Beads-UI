@@ -27,20 +27,44 @@ const ProductGrid = () => {
       lighterType = 2; // Mini BIC
     }
 
+    // Scroll to top immediately and again after state update to prevent Firefox flash
+    const collectionSection = document.getElementById('collection');
+    if (collectionSection) {
+      // Immediate scroll
+      window.scrollTo({
+        top: collectionSection.offsetTop - 100,
+        behavior: 'smooth'
+      });
+
+      // Fallback scroll after React updates
+      setTimeout(() => {
+        collectionSection.scrollIntoView({ behavior: 'smooth' });
+      }, 50);
+    }
+
     setActiveLighterType(lighterType);
     setPage(1); // Reset to first page
     setProducts([]); // Clear products
     setHasMore(true); // Reset pagination
-
-    // Scroll to top of product grid when filter changes
-    const collectionSection = document.getElementById('collection');
-    if (collectionSection) {
-      collectionSection.scrollIntoView({ behavior: 'smooth' });
-    }
   };
 
   // Handle collection/category changes
   const handleCollectionChange = (collectionSlug: string, categoryId?: number) => {
+    // Scroll to top immediately and again after state update to prevent Firefox flash
+    const collectionSection = document.getElementById('collection');
+    if (collectionSection) {
+      // Immediate scroll
+      window.scrollTo({
+        top: collectionSection.offsetTop - 100,
+        behavior: 'smooth'
+      });
+
+      // Fallback scroll after React updates
+      setTimeout(() => {
+        collectionSection.scrollIntoView({ behavior: 'smooth' });
+      }, 50);
+    }
+
     setActiveCollection(collectionSlug);
     if (categoryId) {
       setActiveCategory(categoryId);
@@ -51,12 +75,6 @@ const ProductGrid = () => {
     setPage(1);
     setProducts([]);
     setHasMore(true);
-
-    // Scroll to top of product grid when filter changes
-    const collectionSection = document.getElementById('collection');
-    if (collectionSection) {
-      collectionSection.scrollIntoView({ behavior: 'smooth' });
-    }
   };
 
 
@@ -158,6 +176,7 @@ const ProductGrid = () => {
                   name={product.name}
                   price={product.price}
                   image={product.primary_image || '/placeholder-product.jpg'}
+                  secondaryImage={product.secondary_image}
                   categoryName={product.category_name}
                   lighterType={product.lighter_type_display}
                   isSoldOut={product.is_sold_out}

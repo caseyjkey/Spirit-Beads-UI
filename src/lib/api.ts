@@ -55,6 +55,7 @@ export interface Product {
   inventory_count: number;
   weight_ounces: number;
   primary_image?: string;
+  secondary_image?: string;
   is_in_stock: boolean;
   category?: string;
   category_name?: string;
