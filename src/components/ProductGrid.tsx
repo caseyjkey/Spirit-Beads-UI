@@ -31,6 +31,12 @@ const ProductGrid = () => {
     setPage(1); // Reset to first page
     setProducts([]); // Clear products
     setHasMore(true); // Reset pagination
+
+    // Scroll to top of product grid when filter changes
+    const collectionSection = document.getElementById('collection');
+    if (collectionSection) {
+      collectionSection.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   // Handle collection/category changes
@@ -45,6 +51,12 @@ const ProductGrid = () => {
     setPage(1);
     setProducts([]);
     setHasMore(true);
+
+    // Scroll to top of product grid when filter changes
+    const collectionSection = document.getElementById('collection');
+    if (collectionSection) {
+      collectionSection.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
 
