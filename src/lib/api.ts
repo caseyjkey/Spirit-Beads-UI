@@ -26,8 +26,9 @@ export const getApiBaseUrl = (): string => {
     return 'http://100.82.23.47:8000/api';
   }
 
-  // Fallback: use same host with port 8000
-  return `http://${host}:8000/api`;
+  // Fallback: use same protocol as current page with port 8000
+  const protocol = window.location.protocol;
+  return `${protocol}//${host}:8000/api`;
 };
 
 /**
