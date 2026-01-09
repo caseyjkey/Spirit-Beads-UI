@@ -2,7 +2,7 @@ module.exports = {
   apps: [{
     name: 'spirit-bead-designs',
     script: 'bun',
-    args: 'preview',
+    args: 'preview --port 8080 --host 0.0.0.0',
     cwd: '/var/www/spirit-bead-designs',
     instances: 1,
     autorestart: true,
