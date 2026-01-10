@@ -7,8 +7,48 @@ import hero3 from "@/assets/hero/hero-3.png";
 import thread from "@/assets/hero/thread.png";
 
 const Hero = () => {
+  const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
+    e.preventDefault();
+
+    // Set flag to prevent product loading during scroll
+    window.dispatchEvent(new CustomEvent('prevent-load', { detail: { prevent: true } }));
+
+    // Wait for DOM to settle, then scroll
+    setTimeout(() => {
+      const section = document.getElementById(sectionId);
+      if (section) {
+        const headerHeight = window.innerWidth >= 768 ? 116 : 100;
+        const vh = window.innerHeight;
+
+        if (sectionId === 'collection') {
+          // Scroll to 100vh to ensure entire hero section is out of view
+          window.scrollTo({
+            top: vh,
+            behavior: 'smooth'
+          });
+        } else {
+          // For about section: calculate position to fill viewport below header
+          const rect = section.getBoundingClientRect();
+          const currentScroll = window.scrollY || document.documentElement.scrollTop;
+          const elementAbsolutePosition = rect.top + currentScroll;
+          const targetScroll = elementAbsolutePosition - headerHeight;
+
+          window.scrollTo({
+            top: targetScroll,
+            behavior: 'smooth'
+          });
+        }
+
+        // Re-enable loading after scroll completes
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('prevent-load', { detail: { prevent: false } }));
+        }, 1000);
+      }
+    }, 300);
+  };
+
   return (
-    <section className="relative min-h-screen md:min-h-0 md:h-[calc(100vh-2rem)] flex items-center justify-center bg-gradient-hero overflow-hidden pt-16 md:pt-20 pb-20 md:pb-8">
+    <section className="relative min-h-[calc(100vh-100px)] md:min-h-0 md:h-[calc(100vh-116px)] flex items-center justify-center bg-gradient-hero overflow-hidden pb-12 md:pb-0">
       {/* Decorative Pattern */}
       <div className="absolute inset-0 opacity-5">
         <div
@@ -61,10 +101,10 @@ const Hero = () => {
               style={{ animationDelay: "0.3s" }}
             >
               <Button variant="hero" size="xl" asChild>
-                <a href="#collection">Shop Collection</a>
+                <a href="#collection" onClick={(e) => scrollToSection(e, 'collection')}>Shop Collection</a>
               </Button>
               <Button variant="outline" size="xl" asChild>
-                <a href="#about">Our Story</a>
+                <a href="#about" onClick={(e) => scrollToSection(e, 'about')}>Our Story</a>
               </Button>
             </div>
           </div>
@@ -170,7 +210,11 @@ const Hero = () => {
 
         {/* Scroll Indicator */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce hidden md:block">
-          <a href="#collection" className="text-muted-foreground hover:text-primary transition-colors">
+          <a
+            href="#collection"
+            onClick={(e) => scrollToSection(e, 'collection')}
+            className="text-muted-foreground hover:text-primary transition-colors"
+          >
             <ArrowDown className="h-6 w-6" />
           </a>
         </div>

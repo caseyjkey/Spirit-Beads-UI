@@ -7,10 +7,12 @@ import { useProducts, useCategories } from "@/hooks/use-api";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import BackToTop from "./BackToTop";
+import { useHeaderState } from "@/hooks/use-header-state";
 
 const ProductGrid = () => {
   const { products, loading, loadingMore, showSkeletons, error, hasMore, skeletonCount, filteredCount, setFilteredCount, activeLighterType, setActiveLighterType, activeCategory, setActiveCategory, setupObserver, setPage, setProducts, setHasMore } = useProducts();
   const { categories, loading: categoriesLoading } = useCategories();
+  const { isNavVisible, isBannerVisible } = useHeaderState();
   const [activeCollection, setActiveCollection] = useState('all');
   const [activeSize, setActiveSize] = useState('all');
   const carouselRef = useRef<HTMLDivElement>(null);
@@ -27,25 +29,25 @@ const ProductGrid = () => {
       lighterType = 2; // Mini BIC
     }
 
-    // Prevent Firefox footer scroll by validating element and using immediate scroll
-    const collectionSection = document.getElementById('collection');
-    if (collectionSection) {
-      // Ensure element is valid and in DOM
-      const rect = collectionSection.getBoundingClientRect();
-      if (rect.top > 0) {
-        // Use multiple scroll methods for maximum reliability
-        collectionSection.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start'
-        });
+    // Wait for DOM to settle (products may be loading)
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const collectionSection = document.getElementById('collection');
+        if (collectionSection) {
+          const rect = collectionSection.getBoundingClientRect();
+          if (rect.top > 0) {
+            const headerHeight = window.innerWidth >= 768 ? 116 : 100;
+            const scrollTop = window.scrollY || document.documentElement.scrollTop;
+            const targetPosition = rect.top + scrollTop - headerHeight;
 
-        // Force immediate scroll as backup
-        window.scrollTo({
-          top: collectionSection.offsetTop - 100,
-          behavior: 'smooth'
-        });
-      }
-    }
+            window.scrollTo({
+              top: targetPosition,
+              behavior: 'smooth'
+            });
+          }
+        }
+      });
+    });
 
     setActiveLighterType(lighterType);
     setPage(1); // Reset to first page
@@ -55,25 +57,25 @@ const ProductGrid = () => {
 
   // Handle collection/category changes
   const handleCollectionChange = (collectionSlug: string, categoryId?: number) => {
-    // Prevent Firefox footer scroll by validating element and using immediate scroll
-    const collectionSection = document.getElementById('collection');
-    if (collectionSection) {
-      // Ensure element is valid and in DOM
-      const rect = collectionSection.getBoundingClientRect();
-      if (rect.top > 0) {
-        // Use multiple scroll methods for maximum reliability
-        collectionSection.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start'
-        });
+    // Wait for DOM to settle (products may be loading)
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const collectionSection = document.getElementById('collection');
+        if (collectionSection) {
+          const rect = collectionSection.getBoundingClientRect();
+          if (rect.top > 0) {
+            const headerHeight = window.innerWidth >= 768 ? 116 : 100;
+            const scrollTop = window.scrollY || document.documentElement.scrollTop;
+            const targetPosition = rect.top + scrollTop - headerHeight;
 
-        // Force immediate scroll as backup
-        window.scrollTo({
-          top: collectionSection.offsetTop - 100,
-          behavior: 'smooth'
-        });
-      }
-    }
+            window.scrollTo({
+              top: targetPosition,
+              behavior: 'smooth'
+            });
+          }
+        }
+      });
+    });
 
     setActiveCollection(collectionSlug);
     if (categoryId) {
@@ -116,7 +118,7 @@ const ProductGrid = () => {
 
   if (error) {
     return (
-      <section id="collection" className="py-20 md:py-28 bg-background">
+      <section id="collection" className="py-20 md:py-28 bg-product-bg">
         <div className="container mx-auto px-4 text-center">
           <h2 className="font-display text-3xl md:text-4xl font-semibold text-foreground mb-4">
             Unable to Load Products
@@ -136,7 +138,7 @@ const ProductGrid = () => {
   }
 
   return (
-    <section id="collection" className="py-20 md:py-28 bg-background relative">
+    <section id="collection" className="py-20 md:py-28 bg-product-bg relative">
       <div className="container mx-auto px-4">
         {/* Tier 1: Collection Carousel */}
         <div
@@ -151,7 +153,9 @@ const ProductGrid = () => {
         </div>
 
         {/* Tier 2: Size Filter - Full Width */}
-        <div className="size-filter-container-compact">
+        <div
+          className={`size-filter-container-compact ${isNavVisible ? (isBannerVisible ? 'header-with-banner' : 'header-visible') : ''}`}
+        >
           <SizeFilter
             activeSize={activeSize}
             onSizeChange={handleSizeChange}
@@ -176,7 +180,7 @@ const ProductGrid = () => {
         <div className="container mx-auto px-4">
           <div
             key={`${activeCollection}-${activeSize}`}
-            className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 ${(filteredProducts.length > 0 || showSkeletons) ? 'min-h-[400px]' : ''}`}
+            className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 md:gap-x-8 gap-y-10 md:gap-y-12 ${(filteredProducts.length > 0 || showSkeletons) ? 'min-h-[400px]' : ''}`}
           >
             {/* Show products - each ProductCard has built-in skeleton that cross-fades */}
             {filteredProducts.map((product) => (
