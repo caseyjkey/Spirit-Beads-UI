@@ -18,27 +18,27 @@ const Header = () => {
     // Set flag to prevent product loading during scroll
     window.dispatchEvent(new CustomEvent('prevent-load', { detail: { prevent: true } }));
 
-    // Wait for DOM to settle, then scroll
+    // Wait longer for DOM to settle after products load, then scroll
     setTimeout(() => {
+      const headerHeight = window.innerWidth >= 768 ? 116 : 100;
+
       if (sectionId === 'collection') {
-        // Scroll to the collection section (which starts right after hero)
-        // Use the collection section's position minus header height for proper positioning
-        const collectionSection = document.getElementById('collection');
-        if (collectionSection) {
-          const headerHeight = window.innerWidth >= 768 ? 116 : 100;
-          const rect = collectionSection.getBoundingClientRect();
+        // Find the hero section and scroll to its bottom edge
+        const heroSection = document.querySelector('section[class*="bg-gradient-hero"]') as HTMLElement;
+        if (heroSection) {
+          // Calculate hero's bottom position: hero's absolute top + its height
+          const heroRect = heroSection.getBoundingClientRect();
           const scrollTop = window.scrollY || document.documentElement.scrollTop;
-          const targetPosition = rect.top + scrollTop - headerHeight;
+          const heroBottom = heroRect.top + scrollTop + heroRect.height;
 
           window.scrollTo({
-            top: targetPosition,
+            top: heroBottom,
             behavior: 'smooth'
           });
         }
       } else {
         const section = document.getElementById(sectionId);
         if (section) {
-          const headerHeight = window.innerWidth >= 768 ? 116 : 100;
           const rect = section.getBoundingClientRect();
           const scrollTop = window.scrollY || document.documentElement.scrollTop;
           const targetPosition = rect.top + scrollTop - headerHeight;
@@ -53,8 +53,8 @@ const Header = () => {
       // Re-enable loading after scroll completes
       setTimeout(() => {
         window.dispatchEvent(new CustomEvent('prevent-load', { detail: { prevent: false } }));
-      }, 1500);
-    }, 300);
+      }, 2000);
+    }, 800);
 
     setIsMenuOpen(false);
   }, []);

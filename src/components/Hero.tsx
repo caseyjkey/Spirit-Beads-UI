@@ -13,45 +13,45 @@ const Hero = () => {
     // Set flag to prevent product loading during scroll
     window.dispatchEvent(new CustomEvent('prevent-load', { detail: { prevent: true } }));
 
-    // Wait for DOM to settle, then scroll
+    // Wait longer for DOM to settle after products load, then scroll
     setTimeout(() => {
-      const section = document.getElementById(sectionId);
-      if (section) {
-        const headerHeight = window.innerWidth >= 768 ? 116 : 100;
+      const headerHeight = window.innerWidth >= 768 ? 116 : 100;
 
-        if (sectionId === 'collection') {
-          // Scroll to the collection section (which starts right after hero)
-          // Use the collection section's position minus header height for proper positioning
-          const collectionSection = document.getElementById('collection');
-          if (collectionSection) {
-            const rect = collectionSection.getBoundingClientRect();
-            const currentScroll = window.scrollY || document.documentElement.scrollTop;
-            const targetScroll = rect.top + currentScroll - headerHeight;
+      if (sectionId === 'collection') {
+        // Find the hero section and scroll to its bottom edge
+        const heroSection = document.querySelector('section[class*="bg-gradient-hero"]') as HTMLElement;
+        if (heroSection) {
+          // Calculate hero's bottom position: hero's absolute top + its height
+          const heroRect = heroSection.getBoundingClientRect();
+          const currentScroll = window.scrollY || document.documentElement.scrollTop;
+          const heroBottom = heroRect.top + currentScroll + heroRect.height;
 
-            window.scrollTo({
-              top: targetScroll,
-              behavior: 'smooth'
-            });
-          }
-        } else {
-          // For about section: calculate position to start at header bottom
+          window.scrollTo({
+            top: heroBottom,
+            behavior: 'smooth'
+          });
+        }
+      } else {
+        // For about section: scroll so it starts below the header
+        const section = document.getElementById(sectionId);
+        if (section) {
           const rect = section.getBoundingClientRect();
           const currentScroll = window.scrollY || document.documentElement.scrollTop;
-          const elementAbsolutePosition = rect.top + currentScroll;
-          const targetScroll = elementAbsolutePosition - headerHeight;
+          const sectionTop = rect.top + currentScroll;
+          const targetScroll = sectionTop - headerHeight;
 
           window.scrollTo({
             top: targetScroll,
             behavior: 'smooth'
           });
         }
-
-        // Re-enable loading after scroll completes
-        setTimeout(() => {
-          window.dispatchEvent(new CustomEvent('prevent-load', { detail: { prevent: false } }));
-        }, 1500);
       }
-    }, 300);
+
+      // Re-enable loading after scroll completes
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('prevent-load', { detail: { prevent: false } }));
+      }, 2000);
+    }, 800);
   };
 
   return (
