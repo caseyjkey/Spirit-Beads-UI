@@ -13,45 +13,42 @@ const Hero = () => {
     // Set flag to prevent product loading during scroll
     window.dispatchEvent(new CustomEvent('prevent-load', { detail: { prevent: true } }));
 
-    // Wait longer for DOM to settle after products load, then scroll
-    setTimeout(() => {
-      const headerHeight = window.innerWidth >= 768 ? 116 : 100;
+    const headerHeight = window.innerWidth >= 768 ? 116 : 100;
 
-      if (sectionId === 'collection') {
-        // Find the hero section and scroll to its bottom edge
-        const heroSection = document.querySelector('section[class*="bg-gradient-hero"]') as HTMLElement;
-        if (heroSection) {
-          // Calculate hero's bottom position: hero's absolute top + its height
-          const heroRect = heroSection.getBoundingClientRect();
-          const currentScroll = window.scrollY || document.documentElement.scrollTop;
-          const heroBottom = heroRect.top + currentScroll + heroRect.height;
+    if (sectionId === 'collection') {
+      // For collection: scroll to hero section's bottom edge
+      const heroSection = document.querySelector('section[class*="bg-gradient-hero"]') as HTMLElement;
+      if (heroSection) {
+        const heroRect = heroSection.getBoundingClientRect();
+        const currentScroll = window.scrollY || document.documentElement.scrollTop;
+        const heroBottom = heroRect.top + currentScroll + heroRect.height;
 
-          window.scrollTo({
-            top: heroBottom,
-            behavior: 'smooth'
-          });
-        }
-      } else {
-        // For about section: scroll so it starts below the header
-        const section = document.getElementById(sectionId);
-        if (section) {
-          const rect = section.getBoundingClientRect();
-          const currentScroll = window.scrollY || document.documentElement.scrollTop;
-          const sectionTop = rect.top + currentScroll;
-          const targetScroll = sectionTop - headerHeight;
-
-          window.scrollTo({
-            top: targetScroll,
-            behavior: 'smooth'
-          });
-        }
+        window.scrollTo({
+          top: heroBottom,
+          behavior: 'smooth'
+        });
       }
+    } else {
+      // For about/contact: use scrollIntoView with block offset
+      const section = document.getElementById(sectionId);
+      if (section) {
+        // Get current scroll position
+        const currentScroll = window.scrollY || document.documentElement.scrollTop;
+        const sectionRect = section.getBoundingClientRect();
+        const targetScroll = sectionRect.top + currentScroll - headerHeight;
 
-      // Re-enable loading after scroll completes
-      setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('prevent-load', { detail: { prevent: false } }));
-      }, 2000);
-    }, 800);
+        // Scroll to calculated position
+        window.scrollTo({
+          top: targetScroll,
+          behavior: 'smooth'
+        });
+      }
+    }
+
+    // Re-enable loading after scroll completes
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('prevent-load', { detail: { prevent: false } }));
+    }, 2000);
   };
 
   return (
