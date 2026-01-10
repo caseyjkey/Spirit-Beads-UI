@@ -27,19 +27,24 @@ const ProductGrid = () => {
       lighterType = 2; // Mini BIC
     }
 
-    // Scroll to top immediately and again after state update to prevent Firefox flash
+    // Prevent Firefox footer scroll by validating element and using immediate scroll
     const collectionSection = document.getElementById('collection');
     if (collectionSection) {
-      // Immediate scroll
-      window.scrollTo({
-        top: collectionSection.offsetTop - 100,
-        behavior: 'smooth'
-      });
+      // Ensure element is valid and in DOM
+      const rect = collectionSection.getBoundingClientRect();
+      if (rect.top > 0) {
+        // Use multiple scroll methods for maximum reliability
+        collectionSection.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
 
-      // Fallback scroll after React updates
-      setTimeout(() => {
-        collectionSection.scrollIntoView({ behavior: 'smooth' });
-      }, 50);
+        // Force immediate scroll as backup
+        window.scrollTo({
+          top: collectionSection.offsetTop - 100,
+          behavior: 'smooth'
+        });
+      }
     }
 
     setActiveLighterType(lighterType);
@@ -50,19 +55,24 @@ const ProductGrid = () => {
 
   // Handle collection/category changes
   const handleCollectionChange = (collectionSlug: string, categoryId?: number) => {
-    // Scroll to top immediately and again after state update to prevent Firefox flash
+    // Prevent Firefox footer scroll by validating element and using immediate scroll
     const collectionSection = document.getElementById('collection');
     if (collectionSection) {
-      // Immediate scroll
-      window.scrollTo({
-        top: collectionSection.offsetTop - 100,
-        behavior: 'smooth'
-      });
+      // Ensure element is valid and in DOM
+      const rect = collectionSection.getBoundingClientRect();
+      if (rect.top > 0) {
+        // Use multiple scroll methods for maximum reliability
+        collectionSection.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
 
-      // Fallback scroll after React updates
-      setTimeout(() => {
-        collectionSection.scrollIntoView({ behavior: 'smooth' });
-      }, 50);
+        // Force immediate scroll as backup
+        window.scrollTo({
+          top: collectionSection.offsetTop - 100,
+          behavior: 'smooth'
+        });
+      }
     }
 
     setActiveCollection(collectionSlug);
