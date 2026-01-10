@@ -3,8 +3,8 @@ import { motion } from 'framer-motion';
 
 const BackToTop = () => {
     const [isVisible, setIsVisible] = useState(false);
-    const [isInProductGrid, setIsInProductGrid] = useState(true);
-    const lastIntersectingState = useRef(true);
+    const [isInProductGrid, setIsInProductGrid] = useState(false);
+    const lastIntersectingState = useRef(false);
 
     useEffect(() => {
         // Find ProductGrid section element
@@ -13,6 +13,15 @@ const BackToTop = () => {
         const toggleVisibility = () => {
             // Show button when scrolled past 400px
             setIsVisible(window.pageYOffset > 400);
+        };
+
+        // Initial check for ProductGrid intersection
+        const checkInitialIntersection = () => {
+            if (collectionSection) {
+                const rect = collectionSection.getBoundingClientRect();
+                const isInViewport = rect.top < window.innerHeight && rect.bottom > 0;
+                setIsInProductGrid(isInViewport);
+            }
         };
 
         // Set up Intersection Observer for collection section
@@ -36,7 +45,8 @@ const BackToTop = () => {
         );
 
         window.addEventListener('scroll', toggleVisibility, { passive: true });
-        toggleVisibility(); // Initial check
+        toggleVisibility(); // Initial check for scroll position
+        checkInitialIntersection(); // Initial check for ProductGrid intersection
 
         if (collectionSection) {
             collectionObserver.observe(collectionSection);

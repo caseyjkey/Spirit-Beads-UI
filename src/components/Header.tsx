@@ -21,12 +21,17 @@ const Header = () => {
     // Wait for DOM to settle, then scroll
     setTimeout(() => {
       if (sectionId === 'collection') {
-        // Find hero section and scroll to its full height to clear it from view
-        const heroSection = document.querySelector('section[class*="bg-gradient-hero"]');
-        if (heroSection) {
-          const heroHeight = heroSection.getBoundingClientRect().height;
+        // Scroll to the collection section (which starts right after hero)
+        // Use the collection section's position minus header height for proper positioning
+        const collectionSection = document.getElementById('collection');
+        if (collectionSection) {
+          const headerHeight = window.innerWidth >= 768 ? 116 : 100;
+          const rect = collectionSection.getBoundingClientRect();
+          const scrollTop = window.scrollY || document.documentElement.scrollTop;
+          const targetPosition = rect.top + scrollTop - headerHeight;
+
           window.scrollTo({
-            top: heroHeight,
+            top: targetPosition,
             behavior: 'smooth'
           });
         }
