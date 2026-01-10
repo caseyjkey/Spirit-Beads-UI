@@ -18,16 +18,19 @@ const Hero = () => {
       const section = document.getElementById(sectionId);
       if (section) {
         const headerHeight = window.innerWidth >= 768 ? 116 : 100;
-        const vh = window.innerHeight;
 
         if (sectionId === 'collection') {
-          // Scroll to 100vh to ensure entire hero section is out of view
-          window.scrollTo({
-            top: vh,
-            behavior: 'smooth'
-          });
+          // Find hero section and scroll to its full height to clear it from view
+          const heroSection = document.querySelector('section[class*="bg-gradient-hero"]');
+          if (heroSection) {
+            const heroHeight = heroSection.getBoundingClientRect().height;
+            window.scrollTo({
+              top: heroHeight,
+              behavior: 'smooth'
+            });
+          }
         } else {
-          // For about section: calculate position to fill viewport below header
+          // For about section: calculate position to start at header bottom
           const rect = section.getBoundingClientRect();
           const currentScroll = window.scrollY || document.documentElement.scrollTop;
           const elementAbsolutePosition = rect.top + currentScroll;
@@ -42,7 +45,7 @@ const Hero = () => {
         // Re-enable loading after scroll completes
         setTimeout(() => {
           window.dispatchEvent(new CustomEvent('prevent-load', { detail: { prevent: false } }));
-        }, 1000);
+        }, 1500);
       }
     }, 300);
   };

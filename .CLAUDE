@@ -2,7 +2,54 @@
 This is a botique ecommerce shop for an indigenous artist selling handcrafted beaded lighter cases.
 Maintain a professional, high-quality aesthetic throughout the site.
 </purpose>
+
 <development>
 This site uses `bun` for it's runtime, use `bun dev` and `bun run build` when needed.
 </development>
+
+<design-system>
+- Primary color palette uses warm earth tones inspired by Native American beadwork
+- Key background color: `rgb(var(--product-bg))` = rgb(254, 251, 246) = #FEFBF6
+- Always use CSS variables for colors to maintain consistency
+- Use `bg-product-bg` class for product-related backgrounds
+- Product images have edge feathering (inset box-shadow) to blend with background
+- Header is solid/opaque; size filter uses glassmorphism (blur + transparency)
+- Animations use framer-motion for React components, CSS transitions for simpler effects
+</design-system>
+
+<component-patterns>
+Header + ShippingBanner:
+- Uses HeaderStateProvider context (use-header-state.tsx) for shared scroll state
+- Banner + nav exit together when scrolling down
+- Only nav returns when scrolling up mid-page
+- Banner only returns at scrollY === 0 with fade-in effect
+- Banner is display:none when hidden to prevent blur sampling its orange color
+
+ProductCard:
+- Uses skeleton overlay pattern: skeleton renders behind, content fades in over it
+- Image flip/swap uses XOR logic: `isHovering !== isFlipped` for toggle behavior
+- Desktop: flip button (RotateCcw icon) in top-left corner
+- Mobile: ghost chevrons on edges + pagination dots at bottom center
+- Swipe gestures work via useTouchSwipe hook
+- Uses `.image-loaded` class added via onLoad for staggered image fade-in
+
+ProductGrid:
+- Handles infinite scroll with intersection observer via `setupObserver` ref
+- Category/size filtering done server-side via API parameters
+- SizeFilter is sticky with backdrop blur for premium "ghost" effect
+- Uses `header-visible` class to push filter down when header is shown
+
+SizeFilter:
+- Uses 80% opacity background with 12px blur for see-through effect
+- Dynamically positioned based on header visibility (top: 0 or 64px/80px)
+- Transitions smoothly with header show/hide
+</component-patterns>
+
+<potential-improvements>
+- Consider consolidating animation logic into custom hooks
+- ProductCard's hover/flip state could be simplified with a reducer
+- The skeleton-shimmer CSS could use the product-bg variable instead of hardcoded values
+- Consider extracting image loading logic into a reusable hook with skeleton state
+- Touch/swipe handlers could be unified with the hover/flip logic
+</potential-improvements>
 

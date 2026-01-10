@@ -59,7 +59,10 @@ export const HeaderStateProvider = ({ children }: { children: ReactNode }) => {
       // Scrolling down - hide after small threshold
       else if (scrollDelta.current > 10) {
         setIsNavVisible(false);
-        setIsBannerVisible(false);
+        // Only hide banner if we're not in the middle of scroll-down-from-top animation
+        if (!isScrollingDownFromTop) {
+          setIsBannerVisible(false);
+        }
         scrollDelta.current = 0;
       }
       // Scrolling up - show nav immediately, banner only at top

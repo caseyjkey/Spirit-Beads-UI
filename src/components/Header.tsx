@@ -14,10 +14,43 @@ const Header = () => {
   // Smooth scroll to section with no offset (section fills viewport)
   const scrollToSection = useCallback((e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
     e.preventDefault();
-    const section = document.getElementById(sectionId);
-    if (section) {
-      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+
+    // Set flag to prevent product loading during scroll
+    window.dispatchEvent(new CustomEvent('prevent-load', { detail: { prevent: true } }));
+
+    // Wait for DOM to settle, then scroll
+    setTimeout(() => {
+      if (sectionId === 'collection') {
+        // Find hero section and scroll to its full height to clear it from view
+        const heroSection = document.querySelector('section[class*="bg-gradient-hero"]');
+        if (heroSection) {
+          const heroHeight = heroSection.getBoundingClientRect().height;
+          window.scrollTo({
+            top: heroHeight,
+            behavior: 'smooth'
+          });
+        }
+      } else {
+        const section = document.getElementById(sectionId);
+        if (section) {
+          const headerHeight = window.innerWidth >= 768 ? 116 : 100;
+          const rect = section.getBoundingClientRect();
+          const scrollTop = window.scrollY || document.documentElement.scrollTop;
+          const targetPosition = rect.top + scrollTop - headerHeight;
+
+          window.scrollTo({
+            top: targetPosition,
+            behavior: 'smooth'
+          });
+        }
+      }
+
+      // Re-enable loading after scroll completes
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('prevent-load', { detail: { prevent: false } }));
+      }, 1500);
+    }, 300);
+
     setIsMenuOpen(false);
   }, []);
 

@@ -6,17 +6,6 @@ const SKELETON_MIN_DISPLAY_TIME = 800;
 const BATCH_SIZE = 24; // Number of products per API request
 const GRID_COLUMNS = 3; // Number of columns in the grid (lg breakpoint)
 
-// Module-level flag to prevent loading during programmatic scroll
-const preventLoadState = { current: false };
-
-// Listen for prevent-load events from scroll handlers
-if (typeof window !== 'undefined') {
-  window.addEventListener('prevent-load', ((e: Event) => {
-    const customEvent = e as CustomEvent<{ prevent: boolean }>;
-    preventLoadState.current = customEvent.detail.prevent;
-  }) as EventListener);
-}
-
 // Debug logging - set to false for production
 const DEBUG = false;
 const log = (...args: unknown[]) => {
@@ -40,6 +29,18 @@ export const useProducts = () => {
   const observerRef = useRef<IntersectionObserver | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const loadingStartTimeRef = useRef<number>(0);
+  const preventLoadRef = useRef(false);
+
+  // Listen for prevent-load events from scroll handlers
+  useEffect(() => {
+    const handlePreventLoad = (e: Event) => {
+      const customEvent = e as CustomEvent<{ prevent: boolean }>;
+      preventLoadRef.current = customEvent.detail.prevent;
+    };
+
+    window.addEventListener('prevent-load', handlePreventLoad);
+    return () => window.removeEventListener('prevent-load', handlePreventLoad);
+  }, []);
 
   // Calculate skeleton count: fill remaining row + full batch
   const calculateSkeletonCount = useCallback((currentProductCount: number) => {
@@ -194,12 +195,12 @@ export const useProducts = () => {
       (entries) => {
         const target = entries[0];
         const { hasMore, loading, loadingMore, error, productsLength } = stateRef.current;
-        const canTrigger = hasMore && !loading && !loadingMore && !error && productsLength > 0 && !isLoadingRef.current && !preventLoadState.current;
+        const canTrigger = hasMore && !loading && !loadingMore && !error && productsLength > 0 && !isLoadingRef.current && !preventLoadRef.current;
 
-        log(`👀 IntersectionObserver callback - isIntersecting: ${target.isIntersecting}, canTrigger: ${canTrigger}, scrollY: ${window.scrollY}, preventLoad: ${preventLoadState.current}`);
+        log(`👀 IntersectionObserver callback - isIntersecting: ${target.isIntersecting}, canTrigger: ${canTrigger}, scrollY: ${window.scrollY}, preventLoad: ${preventLoadRef.current}`);
 
         if (!canTrigger && target.isIntersecting) {
-          log(`👀 Cannot trigger - hasMore: ${hasMore}, loading: ${loading}, loadingMore: ${loadingMore}, error: ${!!error}, products: ${productsLength}, isLoadingRef: ${isLoadingRef.current}, preventLoad: ${preventLoadState.current}`);
+          log(`👀 Cannot trigger - hasMore: ${hasMore}, loading: ${loading}, loadingMore: ${loadingMore}, error: ${!!error}, products: ${productsLength}, isLoadingRef: ${isLoadingRef.current}, preventLoad: ${preventLoadRef.current}`);
         }
 
         // Only load more if we have more data

@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast-custom";
 import { getMediaBaseUrl } from "@/lib/api";
-import { Check, RotateCcw } from "lucide-react";
+import { Check, RotateCcw, ChevronLeft, ChevronRight } from "lucide-react";
 import { useTouchSwipe } from "@/hooks/use-touch-swipe";
 
 interface ProductCardProps {
@@ -26,10 +26,17 @@ const ProductCard = memo(({ id, name, price, image, secondaryImage, categoryName
   const [isFlipped, setIsFlipped] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   const [isButtonHovering, setIsButtonHovering] = useState(false);
+  const isTouchInteraction = useRef(false);
 
   const { handlers: swipeHandlers } = useTouchSwipe({
-    onSwipeLeft: () => secondaryImage && setIsFlipped(true),
-    onSwipeRight: () => setIsFlipped(false),
+    onSwipeLeft: () => {
+      isTouchInteraction.current = true;
+      secondaryImage && setIsFlipped(true);
+    },
+    onSwipeRight: () => {
+      isTouchInteraction.current = true;
+      setIsFlipped(false);
+    },
   });
 
   // Trigger content fade-in after mount
@@ -81,21 +88,33 @@ const ProductCard = memo(({ id, name, price, image, secondaryImage, categoryName
       <div className="product-card-content relative">
         {/* Image Container */}
         <div
-          className="relative overflow-hidden"
-          style={{ backgroundColor: '#F4F1ED', aspectRatio: '4 / 5' }}
-          onMouseEnter={() => secondaryImage && !isButtonHovering && setIsHovering(true)}
+          className="relative overflow-hidden bg-product-bg"
+          style={{ aspectRatio: '4 / 5' }}
+          onMouseEnter={() => {
+            // Skip hover effects during touch interactions
+            if (isTouchInteraction.current) return;
+            secondaryImage && !isButtonHovering && setIsHovering(true);
+          }}
           onMouseLeave={() => {
+            // Skip reset during touch interactions
+            if (isTouchInteraction.current) {
+              isTouchInteraction.current = false;
+              return;
+            }
             if (secondaryImage && !isButtonHovering) {
               setIsHovering(false);
-              setIsFlipped(false); // Reset flip state when hover ends
+              // Only reset flip on desktop hover exit
+              if (isHovering) {
+                setIsFlipped(false);
+              }
             }
           }}
           {...swipeHandlers}
         >
-          {/* Flip Icon */}
+          {/* Desktop Flip Button - hidden on mobile */}
           {secondaryImage && (
             <motion.button
-              className="absolute top-3 left-3 z-20 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm shadow-soft flex items-center justify-center border border-gray-200"
+              className="hidden md:flex absolute top-3 left-3 z-20 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm shadow-soft items-center justify-center border border-gray-200"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={(e) => {
@@ -112,20 +131,73 @@ const ProductCard = memo(({ id, name, price, image, secondaryImage, categoryName
             </motion.button>
           )}
 
-          {/* Mobile Corner Fold Indicator */}
+          {/* Mobile Ghost Chevrons - visible only on mobile */}
           {secondaryImage && (
-            <div className="absolute bottom-3 right-3 z-20 md:hidden">
-              <div className="relative">
-                <div className="w-12 h-12 bg-gradient-to-br from-transparent to-gray-800/20" />
-                <div className="absolute bottom-1 right-1 text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  {isFlipped ? 'Front' : 'Back'}
-                </div>
+            <>
+              {/* Left Chevron - go to front/primary */}
+              <button
+                className="md:hidden absolute left-1 top-1/2 -translate-y-1/2 z-20 p-3"
+                style={{ touchAction: 'manipulation' }}
+                onPointerDown={() => {
+                  isTouchInteraction.current = true;
+                  setIsButtonHovering(true);
+                }}
+                onPointerUp={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  setIsFlipped(false);
+                  setTimeout(() => setIsButtonHovering(false), 100);
+                }}
+                onPointerCancel={() => setIsButtonHovering(false)}
+                aria-label="View front"
+              >
+                <ChevronLeft className={`w-6 h-6 transition-opacity duration-200 ${!isFlipped ? 'text-gray-400/30' : 'text-gray-600/50'}`} />
+              </button>
+
+              {/* Right Chevron - go to back/secondary */}
+              <button
+                className="md:hidden absolute right-1 top-1/2 -translate-y-1/2 z-20 p-3"
+                style={{ touchAction: 'manipulation' }}
+                onPointerDown={() => {
+                  isTouchInteraction.current = true;
+                  setIsButtonHovering(true);
+                }}
+                onPointerUp={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  setIsFlipped(true);
+                  setTimeout(() => setIsButtonHovering(false), 100);
+                }}
+                onPointerCancel={() => setIsButtonHovering(false)}
+                aria-label="View back"
+              >
+                <ChevronRight className={`w-6 h-6 transition-opacity duration-200 ${isFlipped ? 'text-gray-400/30' : 'text-gray-600/50'}`} />
+              </button>
+
+              {/* Pagination Dots - visible only on mobile */}
+              <div className="md:hidden absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex gap-1.5">
+                <span
+                  className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${
+                    !isFlipped ? 'bg-gray-700/70 w-3' : 'bg-gray-400/40'
+                  }`}
+                />
+                <span
+                  className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${
+                    isFlipped ? 'bg-gray-700/70 w-3' : 'bg-gray-400/40'
+                  }`}
+                />
               </div>
-            </div>
+            </>
           )}
 
           {/* Image Slider */}
           <div className="relative w-full h-full overflow-hidden">
+            {/*
+              Show secondary when:
+              - Desktop: hovering XOR flipped (hover shows secondary, flip toggles)
+              - Mobile: just flipped (no hover on touch)
+              XOR logic handles both cases: isHovering !== isFlipped
+            */}
             {/* Primary Image */}
             <motion.img
               src={getImageUrl(image)}
@@ -134,9 +206,9 @@ const ProductCard = memo(({ id, name, price, image, secondaryImage, categoryName
               decoding="async"
               className="product-card-image absolute inset-0 w-full h-full object-cover"
               style={{ cursor: secondaryImage ? (isHovering ? 'grab' : 'pointer') : 'default' }}
+              initial={{ x: '0%' }}
               animate={{
-                x: (isHovering && !isFlipped) ? '-100%' : '0',
-                zIndex: (isHovering && !isFlipped) ? 1 : 2
+                x: (isHovering !== isFlipped) ? '-100%' : '0%',
               }}
               transition={{ duration: 0.3, ease: 'easeInOut' }}
               onLoad={(e) => {
@@ -157,9 +229,9 @@ const ProductCard = memo(({ id, name, price, image, secondaryImage, categoryName
                 decoding="async"
                 className="product-card-image absolute inset-0 w-full h-full object-cover"
                 style={{ cursor: secondaryImage ? 'grab' : 'default' }}
+                initial={{ x: '100%' }}
                 animate={{
-                  x: (isHovering && !isFlipped) ? '0' : '100%',
-                  zIndex: (isHovering && !isFlipped) ? 2 : 1
+                  x: (isHovering !== isFlipped) ? '0%' : '100%',
                 }}
                 transition={{ duration: 0.3, ease: 'easeInOut' }}
                 onLoad={(e) => {
@@ -182,7 +254,7 @@ const ProductCard = memo(({ id, name, price, image, secondaryImage, categoryName
           )}
 
           {lighterType && (
-            <div className="absolute top-3 right-3 md:top-4 md:right-4">
+            <div className="absolute top-3 right-3 md:top-4 md:right-4 z-30">
               <span className="inline-block px-2 py-1 text-xs font-medium rounded-md bg-[#4A4A4A]/90 text-[#F4F1ED] backdrop-blur-sm">
                 {lighterType}
               </span>
@@ -207,12 +279,12 @@ const ProductCard = memo(({ id, name, price, image, secondaryImage, categoryName
                 <button
                   onClick={handleAddToCart}
                   disabled={inCart}
-                  className="add-button-bloom border border-primary text-primary bg-transparent disabled:border-foreground disabled:text-foreground disabled:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-60 h-[44px] w-[70px] md:h-[32px] md:w-[60px] text-xs font-medium rounded-md flex items-center justify-center min-w-0 px-2 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-[0.98] active:duration-[100ms] active:scale-95 md:active:scale-[0.98]"
+                  className="add-button-bloom border border-primary text-primary bg-transparent disabled:border-foreground disabled:text-foreground disabled:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-60 h-[44px] w-[70px] md:h-[32px] md:w-[60px] text-xs font-medium rounded-md flex items-center justify-center min-w-0 px-2 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-[0.98] active:duration-&lsqb;100ms&rsqb; active:scale-95 md:active:scale-[0.98]"
                 >
-                  <span className={`relative z-10 transition-opacity duration-[150ms] ${inCart ? 'opacity-0' : 'opacity-100'} whitespace-nowrap`}>
+                  <span className={`relative z-10 transition-opacity duration-&lsqb;150ms&rsqb; ${inCart ? 'opacity-0' : 'opacity-100'} whitespace-nowrap`}>
                     Add
                   </span>
-                  <Check className={`z-10 h-4 w-4 transition-opacity duration-[150ms] ${inCart ? 'opacity-100' : 'opacity-0'} absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2`} />
+                  <Check className={`z-10 h-4 w-4 transition-opacity duration-&lsqb;150ms&rsqb; ${inCart ? 'opacity-100' : 'opacity-0'} absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2`} />
                 </button>
               )}
             </div>
