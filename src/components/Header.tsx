@@ -50,62 +50,74 @@ const Header = () => {
   }, [isMenuOpen]);
 
   // Heights
-  const bannerHeight = 36; // py-2 + text = ~36px
-  const navHeight = 64; // mobile
-  const navHeightMd = 80; // desktop
+  const bannerHeight = 36;
+  const navHeightMd = 80;
 
-  // Nav wrapper transform - slides nav, accounts for scroll position
-  // Nav should stop at 36px from viewport top when approaching top
-  const getNavWrapperTransform = () => {
-    if (!isNavVisible || isScrollingDownFromTop) {
-      // Hidden: slide nav completely off screen
-      return `translateY(-${bannerHeight + navHeightMd}px)`;
+  // Single wrapper transform for both banner and nav
+  // Returns the Y position where the wrapper should be (negative values slide up)
+  const getWrapperY = () => {
+    // Hidden: slide completely off screen
+    if (!isNavVisible) {
+      return -(bannerHeight + navHeightMd);
     }
 
-    // When approaching top (within banner height), stop at 36px from viewport top
+    // Scrolling down from top: both slide up together
+    if (isScrollingDownFromTop) {
+      return -(bannerHeight + navHeightMd);
+    }
+
+    // Approaching top (within banner height): account for scrollY
     if (scrollY <= bannerHeight) {
-      return `translateY(-${scrollY}px)`;
+      return -scrollY;
     }
 
-    // Otherwise, nav wrapper is at viewport top
-    return 'translateY(0)';
+    // Otherwise at viewport top
+    return 0;
   };
 
-  // Nav transform - slides within wrapper based on banner visibility
-  const getNavTransform = () => {
-    // When nav hidden, slide off screen
+  // Nav position: slides from 0 to 36px based on banner visibility
+  const getNavY = () => {
+    // Hidden
     if (!isNavVisible || isScrollingDownFromTop) {
-      return `translateY(-${bannerHeight + navHeightMd}px)`;
+      return -(bannerHeight + navHeightMd);
     }
 
-    // Banner hidden: nav slides up to top of wrapper
-    if (!isBannerVisible) {
-      return `translateY(-${bannerHeight}px)`;
+    // Banner visible: nav at 36px (no offset needed from wrapper)
+    // Banner hidden: nav at 0px (negative offset to slide up)
+    if (isBannerVisible) {
+      return 0;
     }
-
-    // Banner visible: nav stays below banner
-    return 'translateY(0)';
+    return -bannerHeight;
   };
 
   return (
     <div className="fixed top-0 left-0 right-0 z-[100]" style={{ height: `${bannerHeight + navHeightMd}px` }}>
-      {/* Shipping Banner - separate from wrapper, fades in/out at fixed position */}
+      {/* Single wrapper containing both banner and nav */}
       <div
-        className={`absolute top-0 left-0 right-0 bg-primary text-primary-foreground text-center text-sm font-body flex items-center justify-center transition-opacity duration-300 ease-in-out ${isBannerVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-        style={{ height: `${bannerHeight}px` }}
+        className="relative w-full h-full"
+        style={{ transform: `translateY(${getWrapperY()}px)`, transition: 'transform 300ms ease-in-out' }}
       >
-        Flat $5 USA Shipping
-      </div>
+        {/* Shipping Banner - fades in/out at fixed position (0-36px) */}
+        <div
+          className={`absolute left-0 right-0 bg-primary text-primary-foreground text-center text-sm font-body flex items-center justify-center ${isBannerVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+          style={{
+            height: `${bannerHeight}px`,
+            top: '0',
+            transition: isScrollingDownFromTop ? 'none' : 'opacity 300ms ease-in-out',
+            willChange: 'opacity'
+          }}
+        >
+          Flat $5 USA Shipping
+        </div>
 
-      {/* Nav wrapper - slides independently of banner */}
-      <div
-        className="relative w-full transition-transform duration-300 ease-in-out"
-        style={{ transform: getNavWrapperTransform(), height: `${bannerHeight + navHeightMd}px`, top: `${bannerHeight}px` }}
-      >
-        {/* Main Navigation Header */}
+        {/* Main Navigation Header - positioned below banner */}
         <header
-          className="absolute left-0 right-0 bg-background border-b border-border transition-transform duration-300 ease-in-out"
-          style={{ top: '0', transform: getNavTransform() }}
+          className="absolute left-0 right-0 bg-background border-b border-border"
+          style={{
+            top: `${bannerHeight}px`,
+            transform: `translateY(${getNavY()}px)`,
+            transition: 'transform 300ms ease-in-out'
+          }}
         >
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16 md:h-20">

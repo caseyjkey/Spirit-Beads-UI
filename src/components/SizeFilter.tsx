@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 
 interface SizeFilterProps {
     activeSize: string;
@@ -19,17 +18,15 @@ const SizeFilter: React.FC<SizeFilterProps> = ({
     return (
         <div className="size-filter-container">
             <div className="size-filter-wrapper">
-                {sizes.map((size, index) => (
-                    <motion.button
+                {sizes.map((size) => (
+                    <button
                         key={size.value}
                         className={`size-filter-pill ${activeSize === size.value ? 'active' : ''}`}
                         onClick={() => onSizeChange(size.value)}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                        type="button"
                     >
                         {size.label}
-                    </motion.button>
+                    </button>
                 ))}
             </div>
         </div>

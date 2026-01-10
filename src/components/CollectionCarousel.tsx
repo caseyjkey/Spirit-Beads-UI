@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 
 interface Collection {
     id: number;
@@ -24,26 +23,22 @@ const CollectionCarousel: React.FC<CollectionCarouselProps> = ({
     return (
         <div className="collection-carousel-container">
             <div className="collection-carousel-wrapper">
-                <motion.button
+                <button
                     className={`collection-pill ${activeCollection === 'all' ? 'active' : ''}`}
                     onClick={() => onCollectionChange('all')}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                    type="button"
                 >
                     All Collections
-                </motion.button>
+                </button>
                 {safeCollections.map((collection) => (
-                    <motion.button
+                    <button
                         key={collection.id}
                         className={`collection-pill ${activeCollection === collection.slug ? 'active' : ''}`}
                         onClick={() => onCollectionChange(collection.slug, collection.id)}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                        type="button"
                     >
                         {collection.name}
-                    </motion.button>
+                    </button>
                 ))}
             </div>
         </div>
