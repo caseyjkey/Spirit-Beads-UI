@@ -15,6 +15,14 @@ const log = (...args: unknown[]) => {
 };
 
 export const useProducts = () => {
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const loadingStartTimeRef = useRef<number>(0);
+  const preventLoadRef = useRef(false);
+  const initialLoadCompleteRef = useRef(false);
+  const isLoadingRef = useRef(false);
+  const stateRef = useRef({ hasMore: true, loading: true, loadingMore: false, error: null, productsLength: 0 });
+
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -26,20 +34,69 @@ export const useProducts = () => {
   const [filteredCount, setFilteredCount] = useState(0);
   const [activeLighterType, setActiveLighterType] = useState<number | undefined>(undefined);
   const [activeCategory, setActiveCategory] = useState<number | undefined>(undefined);
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const sentinelRef = useRef<HTMLDivElement | null>(null);
-  const loadingStartTimeRef = useRef<number>(0);
-  const preventLoadRef = useRef(false);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false); // State to trigger observer setup
 
-  // Listen for prevent-load events from scroll handlers
-  useEffect(() => {
-    const handlePreventLoad = (e: Event) => {
-      const customEvent = e as CustomEvent<{ prevent: boolean }>;
-      preventLoadRef.current = customEvent.detail.prevent;
-    };
+  const disableObserver = useCallback(() => {
+    preventLoadRef.current = true;
+    log('🔴 Infinite scroll observer DISABLED (preventLoadRef=true)');
+  }, []);
 
-    window.addEventListener('prevent-load', handlePreventLoad);
-    return () => window.removeEventListener('prevent-load', handlePreventLoad);
+  const enableObserver = useCallback(() => {
+    preventLoadRef.current = false;
+    log('🟢 Infinite scroll observer ENABLED (preventLoadRef=false)');
+  }, []);
+
+  const disconnectObserver = useCallback(() => {
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+      log('🔌 Infinite scroll observer DISCONNECTED');
+    }
+    // Also set the flag as a backup
+    preventLoadRef.current = true;
+  }, []);
+
+  const reconnectObserver = useCallback(() => {
+    const node = sentinelRef.current;
+    if (node && initialLoadCompleteRef.current) {
+      // Clean up previous observer if exists
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+
+      // Create and attach new observer
+      const observer = new IntersectionObserver(
+        (entries) => {
+          const target = entries[0];
+          const { hasMore, loading, loadingMore, error, productsLength } = stateRef.current;
+          const canTrigger = hasMore && !loading && !loadingMore && !error && productsLength > 0 && !isLoadingRef.current && !preventLoadRef.current && initialLoadCompleteRef.current;
+
+          log(`👀 IntersectionObserver callback - isIntersecting: ${target.isIntersecting}, canTrigger: ${canTrigger}, scrollY: ${window.scrollY}, preventLoad: ${preventLoadRef.current}`);
+
+          if (!canTrigger && target.isIntersecting) {
+            log(`👀 Cannot trigger - hasMore: ${hasMore}, loading: ${loading}, loadingMore: ${loadingMore}, error: ${!!error}, products: ${productsLength}, isLoadingRef: ${isLoadingRef.current}, preventLoad: ${preventLoadRef.current}`);
+          }
+
+          if (target.isIntersecting && canTrigger) {
+            log(`🚀 Triggering page increment from IntersectionObserver`);
+            setPage(prev => {
+              log(`📄 Page changing: ${prev} -> ${prev + 1}`);
+              return prev + 1;
+            });
+          }
+        },
+        {
+          root: null,
+          rootMargin: '1000px',
+          threshold: 0.1
+        }
+      );
+
+      observerRef.current = observer;
+      observer.observe(node);
+      log('🔗 Infinite scroll observer RECONNECTED');
+    }
+    // Also clear the flag
+    preventLoadRef.current = false;
   }, []);
 
   // Calculate skeleton count: fill remaining row + full batch
@@ -48,9 +105,6 @@ export const useProducts = () => {
     const fillRemaining = itemsInLastRow > 0 ? GRID_COLUMNS - itemsInLastRow : 0;
     return fillRemaining + BATCH_SIZE;
   }, []);
-
-  // Ref to track if we're currently loading to prevent race conditions
-  const isLoadingRef = useRef(false);
 
   const loadMoreProducts = useCallback(async (pageNum: number = 1, lighterType?: number, category?: number) => {
     log(`📥 loadMoreProducts called - page: ${pageNum}, lighterType: ${lighterType}, category: ${category}, scrollY: ${window.scrollY}, isLoadingRef: ${isLoadingRef.current}`);
@@ -112,6 +166,10 @@ export const useProducts = () => {
       log(`🔄 Hiding standalone skeletons, scrollY: ${window.scrollY}`);
       setShowSkeletons(false);
 
+      // Mark initial load as complete to allow infinite scroll
+      initialLoadCompleteRef.current = true;
+      setInitialLoadComplete(true);
+
       setHasMore(response.next !== null);
       setError(null);
 
@@ -166,15 +224,24 @@ export const useProducts = () => {
     log(`📊 State changed - showSkeletons: ${showSkeletons}, loadingMore: ${loadingMore}, skeletonCount: ${skeletonCount}`);
   }, [showSkeletons, loadingMore, skeletonCount]);
 
-  // Use refs to track current state values for the IntersectionObserver callback
-  // This prevents stale closures and unnecessary observer recreations
-  const stateRef = useRef({ hasMore, loading, loadingMore, error, productsLength: products.length });
+  // Update stateRef when dependencies change
   useEffect(() => {
     stateRef.current = { hasMore, loading, loadingMore, error, productsLength: products.length };
   }, [hasMore, loading, loadingMore, error, products.length]);
 
-  // Create a callback ref that sets up the observer when the sentinel element is available
+  // Create a callback ref that sets up observer when sentinel element is available
   const setupObserver = useCallback((node: HTMLDivElement | null) => {
+    // Don't set up observer until initial load is complete
+    if (!initialLoadCompleteRef.current) {
+      log(`👀 Skipping observer setup - initial load not complete yet`);
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+        observerRef.current = null;
+      }
+      sentinelRef.current = node;
+      return;
+    }
+
     // Clean up previous observer
     if (observerRef.current) {
       observerRef.current.disconnect();
@@ -195,7 +262,7 @@ export const useProducts = () => {
       (entries) => {
         const target = entries[0];
         const { hasMore, loading, loadingMore, error, productsLength } = stateRef.current;
-        const canTrigger = hasMore && !loading && !loadingMore && !error && productsLength > 0 && !isLoadingRef.current && !preventLoadRef.current;
+        const canTrigger = hasMore && !loading && !loadingMore && !error && productsLength > 0 && !isLoadingRef.current && !preventLoadRef.current && initialLoadCompleteRef.current;
 
         log(`👀 IntersectionObserver callback - isIntersecting: ${target.isIntersecting}, canTrigger: ${canTrigger}, scrollY: ${window.scrollY}, preventLoad: ${preventLoadRef.current}`);
 
@@ -226,6 +293,46 @@ export const useProducts = () => {
     log(`👀 Observer attached to sentinel`);
   }, []);
 
+  // Set up observer when initial load completes and sentinel is available
+  useEffect(() => {
+    if (initialLoadComplete && sentinelRef.current && !observerRef.current) {
+      const node = sentinelRef.current;
+
+      log(`👀 Setting up IntersectionObserver from useEffect (initialLoadComplete triggered)`);
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          const target = entries[0];
+          const { hasMore, loading, loadingMore, error, productsLength } = stateRef.current;
+          const canTrigger = hasMore && !loading && !loadingMore && !error && productsLength > 0 && !isLoadingRef.current && !preventLoadRef.current && initialLoadCompleteRef.current;
+
+          log(`👀 IntersectionObserver callback - isIntersecting: ${target.isIntersecting}, canTrigger: ${canTrigger}, scrollY: ${window.scrollY}, preventLoad: ${preventLoadRef.current}`);
+
+          if (!canTrigger && target.isIntersecting) {
+            log(`👀 Cannot trigger - hasMore: ${hasMore}, loading: ${loading}, loadingMore: ${loadingMore}, error: ${!!error}, products: ${productsLength}, isLoadingRef: ${isLoadingRef.current}, preventLoad: ${preventLoadRef.current}`);
+          }
+
+          if (target.isIntersecting && canTrigger) {
+            log(`🚀 Triggering page increment from IntersectionObserver`);
+            setPage(prev => {
+              log(`📄 Page changing: ${prev} -> ${prev + 1}`);
+              return prev + 1;
+            });
+          }
+        },
+        {
+          root: null,
+          rootMargin: '1000px',
+          threshold: 0.1
+        }
+      );
+
+      observerRef.current = observer;
+      observer.observe(node);
+      log(`👀 Observer attached to sentinel from useEffect`);
+    }
+  }, [initialLoadComplete]);
+
   return {
     products,
     loading,
@@ -244,6 +351,10 @@ export const useProducts = () => {
     setProducts,
     setHasMore,
     setupObserver,
+    disableObserver,
+    enableObserver,
+    disconnectObserver,
+    reconnectObserver,
     refetch: () => {
       setPage(1);
       setProducts([]);

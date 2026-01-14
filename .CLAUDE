@@ -45,6 +45,20 @@ SizeFilter:
 - Transitions smoothly with header show/hide
 </component-patterns>
 
+<workflow>
+Git Worktree Workflow for Multiple Agents:
+- When working on a feature, create a worktree: `git worktree add .worktrees/<feature-name> -b <feature-branch-name>`
+- Work within your worktree directory: `cd .worktrees/<feature-name>`
+- Commit changes regularly to include them in the feature branch
+- Push changes periodically to remote: `git push -u origin <feature-branch-name>`
+- When feature is complete, return to main directory and use the `/merge-worktree` skill to integrate changes
+- The merge-worktree skill will:
+  - Verify all changes are committed
+  - Merge the feature branch into main
+  - Delete the worktree and feature branch after successful merge
+- This allows multiple agents to work independently without conflicts
+</workflow>
+
 <potential-improvements>
 - Consider consolidating animation logic into custom hooks
 - ProductCard's hover/flip state could be simplified with a reducer

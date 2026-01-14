@@ -1,54 +1,59 @@
 import { Button } from "@/components/ui/button";
 import { ArrowDown } from "lucide-react";
 import { motion } from "framer-motion";
+import { useProducts } from "@/hooks/use-api";
 import hero1 from "@/assets/hero/hero-1.png";
 import hero2 from "@/assets/hero/hero-2.png";
 import hero3 from "@/assets/hero/hero-3.png";
 import thread from "@/assets/hero/thread.png";
 
 const Hero = () => {
+  const { disconnectObserver, disableObserver, reconnectObserver } = useProducts();
+
   const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
     e.preventDefault();
 
-    // Set flag to prevent product loading during scroll
-    window.dispatchEvent(new CustomEvent('prevent-load', { detail: { prevent: true } }));
-
-    const headerHeight = window.innerWidth >= 768 ? 116 : 100;
-
-    if (sectionId === 'collection') {
-      // For collection: scroll to hero section's bottom edge
-      const heroSection = document.querySelector('section[class*="bg-gradient-hero"]') as HTMLElement;
-      if (heroSection) {
-        const heroRect = heroSection.getBoundingClientRect();
-        const currentScroll = window.scrollY || document.documentElement.scrollTop;
-        const heroBottom = heroRect.top + currentScroll + heroRect.height;
-
-        window.scrollTo({
-          top: heroBottom,
-          behavior: 'smooth'
-        });
-      }
-    } else {
-      // For about/contact: use scrollIntoView with block offset
-      const section = document.getElementById(sectionId);
-      if (section) {
-        // Get current scroll position
-        const currentScroll = window.scrollY || document.documentElement.scrollTop;
-        const sectionRect = section.getBoundingClientRect();
-        const targetScroll = sectionRect.top + currentScroll - headerHeight;
-
-        // Scroll to calculated position
-        window.scrollTo({
-          top: targetScroll,
-          behavior: 'smooth'
-        });
-      }
+    // Disable infinite scroll immediately to prevent any triggers during navigation
+    if (sectionId !== 'collection') {
+      disconnectObserver();
+      // Also disable as backup
+      disableObserver();
     }
 
-    // Re-enable loading after scroll completes
-    setTimeout(() => {
-      window.dispatchEvent(new CustomEvent('prevent-load', { detail: { prevent: false } }));
-    }, 2000);
+    const findAndScroll = (retryCount = 0) => {
+      // For collection, we scroll to the bottom of the hero, which is always stable
+      if (sectionId === 'collection') {
+        const heroSection = document.querySelector('section[class*="bg-gradient-hero"]') as HTMLElement;
+        if (heroSection) {
+          const heroRect = heroSection.getBoundingClientRect();
+          const scrollTop = window.scrollY || document.documentElement.scrollTop;
+          const heroBottom = heroRect.top + scrollTop + heroRect.height;
+          window.scrollTo({ top: heroBottom, behavior: 'smooth' });
+        }
+        return;
+      }
+
+      // For about section, target the scroll target element for precision
+      const targetId = sectionId === 'about' ? 'about-scroll-target' : sectionId;
+      const target = document.getElementById(targetId);
+
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        // Re-enable infinite scroll after smooth scroll completes (1 second)
+        setTimeout(() => {
+          reconnectObserver();
+        }, 1000);
+        return;
+      }
+
+      // If section doesn't exist yet and we haven't timed out, poll again
+      if (retryCount < 10) {
+        setTimeout(() => findAndScroll(retryCount + 1), 100);
+      }
+    };
+
+    findAndScroll();
   };
 
   return (

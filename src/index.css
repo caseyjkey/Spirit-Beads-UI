@@ -936,3 +936,39 @@
     inset -8px 0 12px -4px rgb(254 251 246),
     inset 0 8px 12px -4px rgb(254 251 246);
 }
+
+/* Header Animation States */
+@layer components {
+  .header-wrapper {
+    @apply fixed top-0 left-0 right-0 z-[100] h-[116px] transition-transform duration-300 ease-in-out;
+    will-change: transform;
+  }
+
+  .header-wrapper .banner {
+    @apply transition-opacity duration-300 ease-in-out;
+  }
+
+  /* State 1: At Top */
+  .header-at-top {
+    transform: translateY(0);
+  }
+  .header-at-top .banner {
+    opacity: 1;
+  }
+
+  /* State 2: Mid-page, header visible */
+  .header-mid-page {
+    transform: translateY(-36px);
+  }
+  .header-mid-page .banner {
+    opacity: 0;
+  }
+
+  /* State 3: Hidden */
+  .header-hidden {
+    transform: translateY(-116px);
+  }
+  .header-hidden .banner {
+    opacity: 0;
+  }
+}

@@ -9,13 +9,16 @@ import { motion } from "framer-motion";
 import BackToTop from "./BackToTop";
 import { useHeaderState } from "@/hooks/use-header-state";
 
-const ProductGrid = () => {
+const ProductGrid = ({ isAboutSectionVisible }: { isAboutSectionVisible: boolean }) => {
   const { products, loading, loadingMore, showSkeletons, error, hasMore, skeletonCount, filteredCount, setFilteredCount, activeLighterType, setActiveLighterType, activeCategory, setActiveCategory, setupObserver, setPage, setProducts, setHasMore } = useProducts();
   const { categories, loading: categoriesLoading } = useCategories();
-  const { isNavVisible, isBannerVisible } = useHeaderState();
+  const { status } = useHeaderState();
   const [activeCollection, setActiveCollection] = useState('all');
   const [activeSize, setActiveSize] = useState('all');
   const carouselRef = useRef<HTMLDivElement>(null);
+
+  // Note: Infinite scroll is now managed by the scroll functions in Header/Hero
+  // which disconnect before scrolling and re-enable after scroll completes
 
   // Handle size filter changes
   const handleSizeChange = (size: string) => {
@@ -36,7 +39,7 @@ const ProductGrid = () => {
         if (collectionSection) {
           const rect = collectionSection.getBoundingClientRect();
           if (rect.top > 0) {
-            const headerHeight = window.innerWidth >= 768 ? 116 : 100;
+            const headerHeight = status === 'AT_TOP' ? 116 : 80;
             const scrollTop = window.scrollY || document.documentElement.scrollTop;
             const targetPosition = rect.top + scrollTop - headerHeight;
 
@@ -64,7 +67,7 @@ const ProductGrid = () => {
         if (collectionSection) {
           const rect = collectionSection.getBoundingClientRect();
           if (rect.top > 0) {
-            const headerHeight = window.innerWidth >= 768 ? 116 : 100;
+            const headerHeight = status === 'AT_TOP' ? 116 : 80;
             const scrollTop = window.scrollY || document.documentElement.scrollTop;
             const targetPosition = rect.top + scrollTop - headerHeight;
 
@@ -154,7 +157,7 @@ const ProductGrid = () => {
 
         {/* Tier 2: Size Filter - Full Width */}
         <div
-          className={`size-filter-container-compact ${isNavVisible ? (isBannerVisible ? 'header-with-banner' : 'header-visible') : ''}`}
+          className={`size-filter-container-compact ${status === 'AT_TOP' ? 'header-with-banner' : (status === 'MID_PAGE' ? 'header-visible' : '')}`}
         >
           <SizeFilter
             activeSize={activeSize}

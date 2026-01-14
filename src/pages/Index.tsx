@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet-async";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import ProductGrid from "@/components/ProductGrid";
@@ -8,9 +8,13 @@ import Footer from "@/components/Footer";
 import { Toast } from "@/components/Toast";
 import { useToast } from "@/hooks/use-toast-custom";
 import { HeaderStateProvider } from "@/hooks/use-header-state";
+import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 
 const Index = () => {
   const { isVisible, message, toastKey, hideToast, register, unregister } = useToast();
+
+  // Observer to watch About section visibility
+  const [aboutSectionRef, isAboutSectionVisible] = useIntersectionObserver({ threshold: 0.1 });
 
   useEffect(() => {
     register();
@@ -38,8 +42,8 @@ const Index = () => {
           <Header />
           <main className="pt-[100px] md:pt-[116px]">
             <Hero />
-            <ProductGrid />
-            <AboutSection />
+            <ProductGrid isAboutSectionVisible={isAboutSectionVisible} />
+            <AboutSection ref={aboutSectionRef} />
           </main>
           <Footer />
 

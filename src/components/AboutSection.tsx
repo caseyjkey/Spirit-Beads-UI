@@ -1,4 +1,5 @@
 import { Heart, Sparkles, Users } from "lucide-react";
+import { forwardRef } from "react";
 
 const features = [
   {
@@ -18,9 +19,11 @@ const features = [
   },
 ];
 
-const AboutSection = () => {
+const AboutSection = forwardRef<HTMLDivElement>((props, ref) => {
   return (
-    <section id="about" className="py-20 md:py-28 bg-secondary">
+    <section id="about" ref={ref} className="relative py-20 md:py-28 bg-secondary">
+      {/* Scroll target element - ensures scrollTo lands exactly at top of section */}
+      <div id="about-scroll-target" className="absolute top-0 left-0 w-px h-px -mt-[100px]" />
       <div className="container mx-auto px-4">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           {/* Story Content */}
@@ -104,6 +107,8 @@ const AboutSection = () => {
       </div>
     </section>
   );
-};
+});
+
+AboutSection.displayName = 'AboutSection';
 
 export default AboutSection;
