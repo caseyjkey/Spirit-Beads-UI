@@ -665,8 +665,8 @@
     /* Solid background instead of transparent */
     border: 1px solid rgba(209, 205, 199, 0.3);
     /* Subtle border */
-    color: red;
-    /* Debug color */
+    color: hsl(var(--primary));
+    /* Match primary button color (terracotta) */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -680,9 +680,10 @@
   }
 
   .collection-chevron:hover {
-    background: rgba(255, 252, 248, 0.1);
-    /* Subtle background on hover */
+    background: hsl(var(--primary));
+    /* Primary background on hover */
     color: #FFFCF8;
+    /* Light text on hover */
   }
 
   .collection-chevron:active {
@@ -690,17 +691,17 @@
   }
 
   .collection-chevron-left {
-    left: 1rem;
+    left: 0.5rem;
   }
 
   .collection-chevron-right {
-    right: 1rem;
+    right: 0.5rem;
   }
 
   /* Adjust wrapper when chevrons are present */
   .collection-carousel-wrapper.has-chevrons {
-    padding: 0 52px;
-    /* Chevrons are 36px wide at 16px from edge = 52px */
+    padding: 0 44px;
+    /* Chevrons are 36px wide at 8px from edge = 44px on both sides */
     position: relative;
     /* For positioning the gradient caps */
   }
