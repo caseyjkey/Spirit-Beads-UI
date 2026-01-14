@@ -4,11 +4,13 @@ import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/use-cart";
 import { useCartPricing } from "@/hooks/use-cart-pricing";
 import { useCheckout, CheckoutError } from "@/hooks/use-checkout";
+import { useHeaderState } from "@/hooks/use-header-state";
 import { getMediaBaseUrl } from "@/lib/api";
 import { Separator } from "@/components/ui/separator";
 import { QuantitySelector } from "@/components/ui/quantity-selector";
 import { CheckoutErrorDisplay } from "@/components/ui/checkout-error-display";
 import { TrustPillars } from "@/components/TrustPillars";
+import { clsx } from "clsx";
 
 interface CheckoutSidebarProps {
   isOpen: boolean;
@@ -66,6 +68,49 @@ export const CheckoutSidebar = ({ isOpen, onClose }: CheckoutSidebarProps) => {
   const [localCheckoutError, setLocalCheckoutError] = useState<CheckoutError | null>(null);
   const [isRendered, setIsRendered] = useState(isOpen);
   const [isVisible, setIsVisible] = useState(false);
+  const { status } = useHeaderState();
+  const [headerHeight, setHeaderHeight] = useState(116);
+  const [isDesktop, setIsDesktop] = useState(typeof window !== 'undefined' && window.innerWidth >= 768);
+
+  // Calculate actual header height when sidebar opens
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const calculateHeaderHeight = () => {
+      // Use the header state to determine positioning
+      // This is more reliable than trying to measure DOM elements
+      if (status === 'AT_TOP') {
+        setHeaderHeight(116); // Banner (36px) + Header (80px)
+      } else if (status === 'MID_PAGE') {
+        setHeaderHeight(80); // Just Header (80px) - banner not visible
+      } else if (status === 'HIDDEN') {
+        setHeaderHeight(0);
+      } else {
+        setHeaderHeight(80); // Default fallback
+      }
+    };
+
+    calculateHeaderHeight();
+
+    // Also listen for scroll events while open to adjust if needed
+    const handleScroll = () => {
+      calculateHeaderHeight();
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isOpen, status]);
+
+  // Detect desktop/mobile
+  useEffect(() => {
+    const checkDesktop = () => {
+      setIsDesktop(window.innerWidth >= 768);
+    };
+
+    checkDesktop();
+    window.addEventListener('resize', checkDesktop);
+    return () => window.removeEventListener('resize', checkDesktop);
+  }, []);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -181,7 +226,11 @@ export const CheckoutSidebar = ({ isOpen, onClose }: CheckoutSidebarProps) => {
     <>
       {/* Checkout Sidebar */}
       <div
-        className={`checkout-sidebar fixed right-0 top-16 md:top-20 h-[calc(100vh-4rem)] md:h-[calc(100vh-5rem)] w-full max-w-[400px] bg-white shadow-2xl z-[160] flex flex-col overflow-hidden${isVisible ? " is-open" : ""}`}
+        className={`checkout-sidebar fixed right-0 top-0 max-md:top-0 bg-white shadow-2xl z-[200] flex flex-col overflow-hidden w-full max-md:h-[100dvh] md:max-w-[400px]${isVisible ? " is-open" : ""}`}
+        style={isDesktop ? {
+          top: `${headerHeight}px`,
+          height: `calc(100vh - ${headerHeight}px)`
+        } : undefined}
       >
         {/* Header with Close Button */}
         <div className="relative flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">

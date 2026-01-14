@@ -546,11 +546,11 @@
     right: 0;
     width: 40px;
     height: 100%;
-    background: linear-gradient(to right, transparent, hsl(var(--background)));
+    background: linear-gradient(to right, transparent, rgb(var(--product-bg)));
     pointer-events: none;
     z-index: 10;
     opacity: 1;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.15s ease;
   }
 
   .collection-carousel-container.at-end::after {
@@ -574,13 +574,31 @@
     /* Hide scrollbar for Chrome/Safari */
   }
 
-  /* Desktop: center and wrap if needed */
+  /* Desktop: center and wrap if needed, but allow overflow when chevrons are present */
   @media (min-width: 768px) {
     .collection-carousel-wrapper {
       justify-content: center;
       flex-wrap: wrap;
       overflow-x: visible;
       white-space: normal;
+    }
+
+    .collection-carousel-wrapper.has-chevrons {
+      justify-content: flex-start;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      white-space: nowrap;
+      scroll-behavior: smooth;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .collection-carousel-wrapper.has-chevrons .collection-pill {
+      flex-shrink: 0;
+    }
+
+    .collection-carousel-wrapper.has-chevrons::-webkit-scrollbar {
+      display: none;
     }
 
     .collection-carousel-container::after {
@@ -599,7 +617,7 @@
     letter-spacing: 0.05em;
     text-transform: uppercase;
     cursor: pointer;
-    transition: border-color 200ms ease-out;
+    transition: border-color 200ms ease-out, opacity 300ms ease-out, transform 300ms ease-out;
     white-space: nowrap;
     flex-shrink: 0;
     position: relative;
@@ -634,6 +652,114 @@
     width: 300px;
     height: 300px;
   }
+
+  /* Collection Chevron Navigation - Desktop Only */
+  .collection-chevron {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #FFFCF8;
+    /* Solid background instead of transparent */
+    border: 1px solid rgba(209, 205, 199, 0.3);
+    /* Subtle border */
+    color: red;
+    /* Debug color */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 200ms ease-out;
+    z-index: 100;
+    /* Maximum z-index with isolation */
+    isolation: isolate;
+    /* Create new stacking context */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .collection-chevron:hover {
+    background: rgba(255, 252, 248, 0.1);
+    /* Subtle background on hover */
+    color: #FFFCF8;
+  }
+
+  .collection-chevron:active {
+    transform: translateY(-50%) scale(0.95);
+  }
+
+  .collection-chevron-left {
+    left: 1rem;
+  }
+
+  .collection-chevron-right {
+    right: 1rem;
+  }
+
+  /* Adjust wrapper when chevrons are present */
+  .collection-carousel-wrapper.has-chevrons {
+    padding: 0 52px;
+    /* Chevrons are 36px wide at 16px from edge = 52px */
+    position: relative;
+    /* For positioning the gradient caps */
+  }
+
+  /* Sticky Gradient Caps - Only show when chevrons are visible */
+  .collection-carousel-container.has-chevrons::before {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    height: 44px;
+    width: 120px;
+    background: linear-gradient(90deg,
+        rgb(var(--product-bg)) 0%,
+        rgb(var(--product-bg)) 40%,
+        transparent 100%);
+    z-index: 2;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  .collection-carousel-container.has-chevrons.can-scroll-left::before {
+    opacity: 1;
+  }
+
+  .collection-carousel-container.has-chevrons.can-scroll-left.gradient-fade-left::before {
+    opacity: 0;
+  }
+
+  .collection-carousel-container.has-chevrons::after {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    height: 44px;
+    width: 120px;
+    background: linear-gradient(-90deg,
+        rgb(var(--product-bg)) 0%,
+        rgb(var(--product-bg)) 40%,
+        transparent 100%);
+    z-index: 2;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  .collection-carousel-container.has-chevrons.can-scroll-right::after {
+    opacity: 1;
+  }
+
+  .collection-carousel-container.has-chevrons.can-scroll-right.gradient-fade-right::after {
+    opacity: 0;
+  }
+
 
   /* Shimmer Animation - Left to Right */
   @keyframes shimmer {
@@ -690,6 +816,9 @@
     position: sticky;
     top: 80px;
     /* Header height + some spacing */
+    max-width: 100vw;
+    box-sizing: border-box;
+    /* Prevent extending beyond viewport */
     z-index: 50;
     background: rgb(var(--product-bg));
     padding: 16px 0;
@@ -752,11 +881,14 @@
     position: sticky;
     top: 0;
     z-index: 50;
+    width: 100%;
+    max-width: 100vw;
+    box-sizing: border-box;
+    /* Prevent extending beyond viewport */
     background: rgb(254 251 246 / 0.8);
-    padding: 0;
-    margin: 1rem -100vw 1rem -100vw;
-    /* Full width by extending beyond container */
-    left: 100vw;
+    padding: 0 16px;
+    margin: 1rem 0 1rem 0;
+    /* Use padding instead of negative margins */
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid hsl(var(--border) / 0.3);
@@ -770,7 +902,8 @@
 
   /* Push filter down when header + banner visible */
   .size-filter-container-compact.header-with-banner {
-    top: 100px; /* 64px nav + 36px banner */
+    top: 100px;
+    /* 64px nav + 36px banner */
   }
 
   @media (min-width: 768px) {
@@ -779,7 +912,8 @@
     }
 
     .size-filter-container-compact.header-with-banner {
-      top: 116px; /* 80px nav + 36px banner */
+      top: 116px;
+      /* 80px nav + 36px banner */
     }
   }
 
@@ -840,9 +974,11 @@
     .size-filter-container-compact {
       margin: 0 -16px 2rem -16px;
       /* Adjust for mobile padding */
+      max-width: 100vw;
+      box-sizing: border-box;
+      /* Prevent extending beyond viewport */
     }
   }
-}
 
 /* Fade out animation for skeleton cross-fade */
 @keyframes fadeOut {
@@ -936,6 +1072,7 @@
     inset -8px 0 12px -4px rgb(254 251 246),
     inset 0 8px 12px -4px rgb(254 251 246);
 }
+}
 
 /* Header Animation States */
 @layer components {
@@ -952,6 +1089,7 @@
   .header-at-top {
     transform: translateY(0);
   }
+
   .header-at-top .banner {
     opacity: 1;
   }
@@ -960,6 +1098,7 @@
   .header-mid-page {
     transform: translateY(-36px);
   }
+
   .header-mid-page .banner {
     opacity: 0;
   }
@@ -968,6 +1107,7 @@
   .header-hidden {
     transform: translateY(-116px);
   }
+
   .header-hidden .banner {
     opacity: 0;
   }

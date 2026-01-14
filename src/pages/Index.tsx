@@ -9,6 +9,7 @@ import { Toast } from "@/components/Toast";
 import { useToast } from "@/hooks/use-toast-custom";
 import { HeaderStateProvider } from "@/hooks/use-header-state";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
+import { ProductsProvider } from "@/hooks/use-api";
 
 const Index = () => {
   const { isVisible, message, toastKey, hideToast, register, unregister } = useToast();
@@ -35,27 +36,29 @@ const Index = () => {
         <link rel="canonical" href="https://sacredbeads.com" />
       </Helmet>
 
-      <HeaderStateProvider>
-        <div className="min-h-screen bg-background">
-          {/* Checkout overlay for blur effect */}
-          <div id="checkout-overlay" className="checkout-overlay" />
-          <Header />
-          <main className="pt-[100px] md:pt-[116px]">
-            <Hero />
-            <ProductGrid isAboutSectionVisible={isAboutSectionVisible} />
-            <AboutSection ref={aboutSectionRef} />
-          </main>
-          <Footer />
+      <ProductsProvider>
+        <HeaderStateProvider>
+          <div className="min-h-screen bg-background">
+            {/* Checkout overlay for blur effect */}
+            <div id="checkout-overlay" className="checkout-overlay" />
+            <Header />
+            <main className="pt-[100px] md:pt-[116px]">
+              <Hero />
+              <ProductGrid isAboutSectionVisible={isAboutSectionVisible} />
+              <AboutSection ref={aboutSectionRef} />
+            </main>
+            <Footer />
 
-          {/* Global Toast */}
-          <Toast
-            message={message}
-            isVisible={isVisible}
-            toastKey={toastKey}
-            onDismiss={hideToast}
-          />
-        </div>
-      </HeaderStateProvider>
+            {/* Global Toast */}
+            <Toast
+              message={message}
+              isVisible={isVisible}
+              toastKey={toastKey}
+              onDismiss={hideToast}
+            />
+          </div>
+        </HeaderStateProvider>
+      </ProductsProvider>
     </>
   );
 };

@@ -1,14 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { ArrowDown } from "lucide-react";
 import { motion } from "framer-motion";
-import { useProducts } from "@/hooks/use-api";
+import { useProductsContext } from "@/hooks/use-api";
+import { useHeaderState } from "@/hooks/use-header-state";
 import hero1 from "@/assets/hero/hero-1.png";
 import hero2 from "@/assets/hero/hero-2.png";
 import hero3 from "@/assets/hero/hero-3.png";
 import thread from "@/assets/hero/thread.png";
 
 const Hero = () => {
-  const { disconnectObserver, disableObserver, reconnectObserver } = useProducts();
+  const { disconnectObserver, disableObserver } = useProductsContext();
+  const { status } = useHeaderState();
 
   const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
     e.preventDefault();
@@ -21,6 +23,9 @@ const Hero = () => {
     }
 
     const findAndScroll = (retryCount = 0) => {
+      // Calculate header height based on current state
+      const headerHeight = status === 'AT_TOP' ? 116 : 80;
+
       // For collection, we scroll to the bottom of the hero, which is always stable
       if (sectionId === 'collection') {
         const heroSection = document.querySelector('section[class*="bg-gradient-hero"]') as HTMLElement;
@@ -33,17 +38,17 @@ const Hero = () => {
         return;
       }
 
-      // For about section, target the scroll target element for precision
-      const targetId = sectionId === 'about' ? 'about-scroll-target' : sectionId;
-      const target = document.getElementById(targetId);
+      // For about and contact, use calculation-based scroll
+      const target = document.getElementById(sectionId);
 
       if (target) {
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const rect = target.getBoundingClientRect();
+        const scrollTop = window.scrollY || document.documentElement.scrollTop;
+        const targetPosition = rect.top + scrollTop - headerHeight;
 
-        // Re-enable infinite scroll after smooth scroll completes (1 second)
-        setTimeout(() => {
-          reconnectObserver();
-        }, 1000);
+        window.scrollTo({ top: targetPosition, behavior: 'smooth' });
+        // Infinite scroll will be re-enabled when user scrolls back up into ProductGrid
+        // (handled by scroll listener in use-api.ts)
         return;
       }
 

@@ -3,61 +3,47 @@ import { motion } from 'framer-motion';
 
 const BackToTop = () => {
     const [isVisible, setIsVisible] = useState(false);
-    const [isInProductGrid, setIsInProductGrid] = useState(false);
-    const lastIntersectingState = useRef(false);
+    const [isAboveFooter, setIsAboveFooter] = useState(true);
+    const lastFooterState = useRef(true);
 
     useEffect(() => {
-        // Find ProductGrid section element
-        const collectionSection = document.querySelector('#collection') as HTMLElement;
+        // Button is 48px tall (p-3 = 12px padding * 2 + 24px icon), positioned bottom-8 (32px)
+        // We want to hide when footer would overlap with button position
+        const BUTTON_BOTTOM_OFFSET = 32; // bottom-8
+        const BUTTON_HEIGHT = 48;
+        const FADE_BUFFER = 20; // Start fading a bit before reaching the footer
 
-        const toggleVisibility = () => {
+        const handleScroll = () => {
             // Show button when scrolled past 400px
             setIsVisible(window.pageYOffset > 400);
-        };
 
-        // Initial check for ProductGrid intersection
-        const checkInitialIntersection = () => {
-            if (collectionSection) {
-                const rect = collectionSection.getBoundingClientRect();
-                const isInViewport = rect.top < window.innerHeight && rect.bottom > 0;
-                setIsInProductGrid(isInViewport);
-            }
-        };
+            // Check if footer is approaching the button position
+            const footer = document.getElementById('contact');
+            if (footer) {
+                const footerRect = footer.getBoundingClientRect();
+                const viewportHeight = window.innerHeight;
 
-        // Set up Intersection Observer for collection section
-        // Button should only show when user is within the ProductGrid section
-        const collectionObserver = new IntersectionObserver(
-            (entries) => {
-                const [entry] = entries;
-                const isNowIntersecting = entry.isIntersecting;
+                // Button visual bottom position from viewport bottom
+                const buttonBottomFromViewportBottom = BUTTON_BOTTOM_OFFSET;
+                // Footer top position from viewport bottom
+                const footerTopFromViewportBottom = viewportHeight - footerRect.top;
+
+                // Hide button when footer gets close to button position
+                const shouldBeAboveFooter = footerTopFromViewportBottom < (buttonBottomFromViewportBottom + BUTTON_HEIGHT + FADE_BUFFER);
 
                 // Only update state if it actually changes to prevent thrashing
-                if (isNowIntersecting !== lastIntersectingState.current) {
-                    lastIntersectingState.current = isNowIntersecting;
-                    setIsInProductGrid(isNowIntersecting);
+                if (shouldBeAboveFooter !== lastFooterState.current) {
+                    lastFooterState.current = shouldBeAboveFooter;
+                    setIsAboveFooter(shouldBeAboveFooter);
                 }
-            },
-            {
-                root: null,
-                rootMargin: '0px 0px -10% 0px', // Slight margin at bottom for earlier hide
-                threshold: 0
             }
-        );
+        };
 
-        window.addEventListener('scroll', toggleVisibility, { passive: true });
-        toggleVisibility(); // Initial check for scroll position
-        checkInitialIntersection(); // Initial check for ProductGrid intersection
-
-        if (collectionSection) {
-            collectionObserver.observe(collectionSection);
-        }
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        handleScroll(); // Initial check
 
         return () => {
-            window.removeEventListener('scroll', toggleVisibility);
-            if (collectionSection) {
-                collectionObserver.unobserve(collectionSection);
-            }
-            collectionObserver.disconnect();
+            window.removeEventListener('scroll', handleScroll);
         };
     }, []);
 
@@ -68,8 +54,8 @@ const BackToTop = () => {
         });
     };
 
-    // Combined visibility: show only when scrolled enough AND within ProductGrid bounds
-    const shouldBeVisible = isVisible && isInProductGrid;
+    // Show when scrolled enough AND button is above the footer
+    const shouldBeVisible = isVisible && isAboveFooter;
 
     return (
         <motion.button

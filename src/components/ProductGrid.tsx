@@ -3,14 +3,14 @@ import CustomOrderDialog from "./CustomOrderDialog";
 import CollectionCarousel from "./CollectionCarousel";
 import SizeFilter from "./SizeFilter";
 import SkeletonCard from "./SkeletonCard";
-import { useProducts, useCategories } from "@/hooks/use-api";
+import { useProductsContext, useCategories } from "@/hooks/use-api";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import BackToTop from "./BackToTop";
 import { useHeaderState } from "@/hooks/use-header-state";
 
 const ProductGrid = ({ isAboutSectionVisible }: { isAboutSectionVisible: boolean }) => {
-  const { products, loading, loadingMore, showSkeletons, error, hasMore, skeletonCount, filteredCount, setFilteredCount, activeLighterType, setActiveLighterType, activeCategory, setActiveCategory, setupObserver, setPage, setProducts, setHasMore } = useProducts();
+  const { products, loading, loadingMore, showSkeletons, error, hasMore, skeletonCount, filteredCount, setFilteredCount, activeLighterType, setActiveLighterType, activeCategory, setActiveCategory, setupObserver, setPage, setProducts, setHasMore } = useProductsContext();
   const { categories, loading: categoriesLoading } = useCategories();
   const { status } = useHeaderState();
   const [activeCollection, setActiveCollection] = useState('all');
@@ -32,22 +32,20 @@ const ProductGrid = ({ isAboutSectionVisible }: { isAboutSectionVisible: boolean
       lighterType = 2; // Mini BIC
     }
 
-    // Wait for DOM to settle (products may be loading)
+    // Always scroll to top of collection when size changes
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         const collectionSection = document.getElementById('collection');
         if (collectionSection) {
           const rect = collectionSection.getBoundingClientRect();
-          if (rect.top > 0) {
-            const headerHeight = status === 'AT_TOP' ? 116 : 80;
-            const scrollTop = window.scrollY || document.documentElement.scrollTop;
-            const targetPosition = rect.top + scrollTop - headerHeight;
+          const headerHeight = status === 'AT_TOP' ? 116 : 80;
+          const scrollTop = window.scrollY || document.documentElement.scrollTop;
+          const targetPosition = rect.top + scrollTop - headerHeight;
 
-            window.scrollTo({
-              top: targetPosition,
-              behavior: 'smooth'
-            });
-          }
+          window.scrollTo({
+            top: targetPosition,
+            behavior: 'smooth'
+          });
         }
       });
     });

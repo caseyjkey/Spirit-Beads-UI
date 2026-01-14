@@ -21,7 +21,7 @@ const CategoryPills: React.FC<CategoryPillsProps> = ({
         <div className="category-scroll-container">
             <div className="category-wrapper">
                 <motion.button
-                    className={`pill ${activeCategory === 'all' ? 'active' : ''}`}
+                    className={`collection-pill ${activeCategory === 'all' ? 'active' : ''}`}
                     onClick={() => onCategoryChange('all')}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, createContext, useContext, ReactNode } from 'react';
 import { apiClient, Product, Category } from '@/lib/api';
 
 // Minimum time (ms) to show skeleton loading state for a premium feel
@@ -22,6 +22,8 @@ export const useProducts = () => {
   const initialLoadCompleteRef = useRef(false);
   const isLoadingRef = useRef(false);
   const stateRef = useRef({ hasMore: true, loading: true, loadingMore: false, error: null, productsLength: 0 });
+  const isNavigatingRef = useRef(false);
+  const lastScrollYRef = useRef(0);
 
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,6 +55,10 @@ export const useProducts = () => {
     }
     // Also set the flag as a backup
     preventLoadRef.current = true;
+    // Mark that we're navigating (programmatic scroll)
+    isNavigatingRef.current = true;
+    lastScrollYRef.current = window.scrollY;
+    log('🧭 Navigation mode ENABLED');
   }, []);
 
   const reconnectObserver = useCallback(() => {
@@ -67,6 +73,13 @@ export const useProducts = () => {
       const observer = new IntersectionObserver(
         (entries) => {
           const target = entries[0];
+
+          // Early exit if we're in navigation mode (user clicked a nav link)
+          if (isNavigatingRef.current) {
+            log(`👀 IntersectionObserver callback SKIPPED - navigation mode active`);
+            return;
+          }
+
           const { hasMore, loading, loadingMore, error, productsLength } = stateRef.current;
           const canTrigger = hasMore && !loading && !loadingMore && !error && productsLength > 0 && !isLoadingRef.current && !preventLoadRef.current && initialLoadCompleteRef.current;
 
@@ -97,6 +110,9 @@ export const useProducts = () => {
     }
     // Also clear the flag
     preventLoadRef.current = false;
+    // Clear navigation mode
+    isNavigatingRef.current = false;
+    log('🧭 Navigation mode DISABLED');
   }, []);
 
   // Calculate skeleton count: fill remaining row + full batch
@@ -261,6 +277,13 @@ export const useProducts = () => {
     const observer = new IntersectionObserver(
       (entries) => {
         const target = entries[0];
+
+        // Early exit if we're in navigation mode (user clicked a nav link)
+        if (isNavigatingRef.current) {
+          log(`👀 IntersectionObserver callback SKIPPED - navigation mode active`);
+          return;
+        }
+
         const { hasMore, loading, loadingMore, error, productsLength } = stateRef.current;
         const canTrigger = hasMore && !loading && !loadingMore && !error && productsLength > 0 && !isLoadingRef.current && !preventLoadRef.current && initialLoadCompleteRef.current;
 
@@ -303,6 +326,13 @@ export const useProducts = () => {
       const observer = new IntersectionObserver(
         (entries) => {
           const target = entries[0];
+
+          // Early exit if we're in navigation mode (user clicked a nav link)
+          if (isNavigatingRef.current) {
+            log(`👀 IntersectionObserver callback SKIPPED - navigation mode active`);
+            return;
+          }
+
           const { hasMore, loading, loadingMore, error, productsLength } = stateRef.current;
           const canTrigger = hasMore && !loading && !loadingMore && !error && productsLength > 0 && !isLoadingRef.current && !preventLoadRef.current && initialLoadCompleteRef.current;
 
@@ -332,6 +362,70 @@ export const useProducts = () => {
       log(`👀 Observer attached to sentinel from useEffect`);
     }
   }, [initialLoadComplete]);
+
+  // Scroll listener to re-enable infinite scroll when user scrolls up into ProductGrid
+  useEffect(() => {
+    if (!initialLoadComplete) return;
+
+    let scrollEndTimeout: ReturnType<typeof setTimeout> | null = null;
+    let navigationStartTime = 0;
+
+    const handleScroll = () => {
+      // Only process if we're in navigation mode (user clicked nav link)
+      if (!isNavigatingRef.current || !preventLoadRef.current) return;
+
+      // Track when navigation mode started
+      if (navigationStartTime === 0) {
+        navigationStartTime = Date.now();
+      }
+
+      // Ignore scroll events during first 1.2 seconds after navigation started
+      // (smooth scroll animation duration)
+      const timeSinceNavStart = Date.now() - navigationStartTime;
+      if (timeSinceNavStart < 1200) {
+        lastScrollYRef.current = window.scrollY;
+        return;
+      }
+
+      const currentScrollY = window.scrollY;
+      const isScrollingUp = currentScrollY < lastScrollYRef.current;
+      lastScrollYRef.current = currentScrollY;
+
+      // Check if we're scrolling up
+      if (!isScrollingUp) return;
+
+      // Clear any pending scroll end check
+      if (scrollEndTimeout) {
+        clearTimeout(scrollEndTimeout);
+      }
+
+      // Debounce: wait for scroll to settle before re-enabling
+      scrollEndTimeout = setTimeout(() => {
+        if (!isNavigatingRef.current || !preventLoadRef.current) return;
+
+        // Check if the sentinel (bottom of products / last row) is visible
+        const sentinel = document.getElementById('bottom-sentinel');
+        if (!sentinel) return;
+
+        const sentinelRect = sentinel.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+
+        // Re-enable when the sentinel (last row of products) comes into view
+        // This means the user has scrolled up enough to see the last row
+        if (sentinelRect.top < viewportHeight) {
+          log('📍 User scrolled up to last row of products - re-enabling infinite scroll');
+          navigationStartTime = 0; // Reset for next navigation
+          reconnectObserver();
+        }
+      }, 150); // Wait 150ms after scroll stops
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollEndTimeout) clearTimeout(scrollEndTimeout);
+    };
+  }, [initialLoadComplete, reconnectObserver]);
 
   return {
     products,
@@ -364,6 +458,33 @@ export const useProducts = () => {
       loadMoreProducts(1);
     }
   };
+};
+
+// Products Context for sharing state across components
+type ProductsContextValue = ReturnType<typeof useProductsInternal>;
+
+const ProductsContext = createContext<ProductsContextValue | null>(null);
+
+// Rename the internal hook
+const useProductsInternal = useProducts;
+
+// Provider component
+export const ProductsProvider = ({ children }: { children: ReactNode }) => {
+  const value = useProductsInternal();
+  return (
+    <ProductsContext.Provider value={value}>
+      {children}
+    </ProductsContext.Provider>
+  );
+};
+
+// Hook to consume the context - this is what components should use
+export const useProductsContext = () => {
+  const context = useContext(ProductsContext);
+  if (!context) {
+    throw new Error('useProductsContext must be used within a ProductsProvider');
+  }
+  return context;
 };
 
 export const useCategories = () => {
