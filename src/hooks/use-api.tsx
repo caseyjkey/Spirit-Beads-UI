@@ -439,17 +439,24 @@ export const useProducts = () => {
       scrollEndTimeout = setTimeout(() => {
         if (!isNavigatingRef.current || !preventLoadRef.current) return;
 
-        // Check if the sentinel (bottom of products / last row) is visible
+        const productGrid = document.getElementById('collection');
         const sentinel = document.getElementById('bottom-sentinel');
-        if (!sentinel) return;
+        if (!productGrid || !sentinel) return;
 
+        const gridRect = productGrid.getBoundingClientRect();
         const sentinelRect = sentinel.getBoundingClientRect();
         const viewportHeight = window.innerHeight;
 
-        // Re-enable when the sentinel (last row of products) comes into view
-        // This means the user has scrolled up enough to see the last row
-        if (sentinelRect.top < viewportHeight) {
-          log('📍 User scrolled up to last row of products - re-enabling infinite scroll');
+        // Check if ProductGrid is substantially visible (bottom is in lower 50% of viewport or below)
+        // This prevents triggering when at About/Contact where ProductGrid is fully scrolled past
+        const isProductGridVisible = gridRect.bottom > viewportHeight * 0.5;
+
+        // Check if sentinel is approaching (within 1000px, matching IntersectionObserver rootMargin)
+        // This triggers when viewing the last ~2 rows of products
+        const isSentinelApproaching = sentinelRect.top < viewportHeight + 1000;
+
+        if (isProductGridVisible && isSentinelApproaching) {
+          log('📍 User scrolled up to products area - re-enabling infinite scroll');
           navigationStartTime = 0; // Reset for next navigation
           reconnectObserver();
         }

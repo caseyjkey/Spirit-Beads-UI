@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { CartButton } from "./CartButton";
 import { useCheckoutSidebar } from "@/hooks/use-checkout-sidebar";
 import { CheckoutSidebar } from "@/components/CheckoutSidebar";
@@ -12,7 +12,8 @@ const Header = () => {
   const [isMenuVisible, setIsMenuVisible] = useState(false);
   const { status } = useHeaderState();
   const { isOpen, openSidebar, closeSidebar } = useCheckoutSidebar();
-  const { disconnectObserver, disableObserver } = useProductsContext();
+  const { disconnectObserver, disableObserver, loadingMore } = useProductsContext();
+  const scrollingToRef = useRef<string | null>(null);
 
   const toggleSidebar = () => {
     if (isOpen) {
@@ -25,6 +26,9 @@ const Header = () => {
   const scrollToSection = useCallback((e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
     e.preventDefault();
 
+    // Track which section we're scrolling to (allows cancellation if user clicks different nav)
+    scrollingToRef.current = sectionId;
+
     // Disable infinite scroll immediately to prevent any triggers during navigation
     if (sectionId !== 'collection') {
       disconnectObserver();
@@ -32,7 +36,7 @@ const Header = () => {
       disableObserver();
     }
 
-    const findAndScroll = (retryCount = 0) => {
+    const performScroll = () => {
       // Calculate header height based on current state
       const headerHeight = status === 'AT_TOP' ? 116 : 80;
 
@@ -44,31 +48,85 @@ const Header = () => {
           const heroBottom = heroRect.top + scrollTop + heroRect.height;
           window.scrollTo({ top: heroBottom, behavior: 'smooth' });
         }
+        scrollingToRef.current = null;
         return;
       }
 
-      // For about and contact, use calculation-based scroll
+      // For about and contact, use scroll-and-verify approach
       const target = document.getElementById(sectionId);
 
-      if (target) {
+      if (!target) {
+        // Element not found, retry
+        setTimeout(() => {
+          if (scrollingToRef.current === sectionId) {
+            performScroll();
+          }
+        }, 100);
+        return;
+      }
+
+      const scrollToTarget = (attemptCount = 0) => {
+        // Abort if user clicked a different nav item
+        if (scrollingToRef.current !== sectionId) return;
+
+        // Max 5 attempts to prevent infinite loop
+        if (attemptCount > 5) {
+          scrollingToRef.current = null;
+          return;
+        }
+
         const rect = target.getBoundingClientRect();
         const scrollTop = window.scrollY || document.documentElement.scrollTop;
         const targetPosition = rect.top + scrollTop - headerHeight;
 
+        // Check if we're already at the target (within 5px tolerance)
+        const currentOffset = Math.abs(rect.top - headerHeight);
+        if (currentOffset < 5) {
+          scrollingToRef.current = null;
+          return; // We've arrived
+        }
+
         window.scrollTo({ top: targetPosition, behavior: 'smooth' });
-        // Infinite scroll will be re-enabled when user scrolls back up into ProductGrid
-        // (handled by scroll listener in use-api.ts)
+
+        // Verify we reach target after scroll animation completes
+        // If page height changed during scroll (products loaded), scroll again
+        setTimeout(() => {
+          if (scrollingToRef.current !== sectionId) return;
+
+          const newRect = target.getBoundingClientRect();
+          const newOffset = Math.abs(newRect.top - headerHeight);
+
+          // If still not at target (page height likely changed), scroll again
+          if (newOffset > 20) {
+            scrollToTarget(attemptCount + 1);
+          } else {
+            scrollingToRef.current = null;
+          }
+        }, 600); // Check after smooth scroll settles (~500-600ms)
+      };
+
+      scrollToTarget();
+    };
+
+    // Wait for loading to complete before scrolling
+    // This prevents scrolling to a position that will change when products load
+    const waitForLoadingAndScroll = (waitCount = 0) => {
+      // Max 30 waits (3 seconds) to prevent infinite waiting
+      if (waitCount > 30) {
+        performScroll();
         return;
       }
 
-      if (retryCount < 10) {
-        setTimeout(() => findAndScroll(retryCount + 1), 100);
+      if (loadingMore) {
+        setTimeout(() => waitForLoadingAndScroll(waitCount + 1), 100);
+      } else {
+        performScroll();
       }
     };
 
-    findAndScroll();
+    waitForLoadingAndScroll();
     setIsMenuOpen(false);
-  }, [disconnectObserver, disableObserver, status]);
+  }, [disconnectObserver, disableObserver, status, loadingMore]);
 
   useEffect(() => {
     if (isOpen && isMenuOpen) {
