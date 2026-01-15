@@ -58,7 +58,13 @@ const Hero = () => {
       }
     };
 
-    findAndScroll();
+    // Wait for DOM to stabilize after disabling infinite scroll before calculating position
+    requestAnimationFrame(() => {
+      // Double requestAnimationFrame to ensure any pending rendering has completed
+      requestAnimationFrame(() => {
+        findAndScroll();
+      });
+    });
   };
 
   return (
