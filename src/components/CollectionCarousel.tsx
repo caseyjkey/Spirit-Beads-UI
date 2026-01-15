@@ -45,19 +45,33 @@ const CollectionCarousel: React.FC<CollectionCarouselProps> = ({
     useEffect(() => {
         const checkOverflow = () => {
             if (carouselRef.current && isDesktop) {
-                const { scrollWidth, clientWidth } = carouselRef.current;
+                const { scrollWidth, clientWidth, scrollLeft } = carouselRef.current;
                 const hasOverflow = scrollWidth > clientWidth + 1 || safeCollections.length > 3;
                 setNeedsChevrons(hasOverflow);
+
+                // Also set initial chevron visibility states
+                if (hasOverflow) {
+                    const canScroll = scrollWidth > clientWidth;
+                    setCanScrollLeft(scrollLeft > 0);
+                    setCanScrollRight(canScroll);
+                }
             } else {
                 setNeedsChevrons(false);
+                setCanScrollLeft(false);
+                setCanScrollRight(false);
             }
         };
 
-        // Check after initial render and on resize
+        // Check after initial render and on resize with delay for DOM to settle
+        const timer = setTimeout(() => {
+            checkOverflow();
+        }, 100);
+
         checkOverflow();
         window.addEventListener('resize', checkOverflow, { passive: true });
 
         return () => {
+            clearTimeout(timer);
             window.removeEventListener('resize', checkOverflow);
         };
     }, [isDesktop, safeCollections]);
@@ -116,9 +130,10 @@ const CollectionCarousel: React.FC<CollectionCarouselProps> = ({
             // Slide out left gradient (only if visible)
             if (containerRef.current && canScrollLeft) {
                 containerRef.current.classList.add('gradient-fade-left');
+                // Remove after smooth scroll completes (400ms)
                 setTimeout(() => {
                     containerRef.current?.classList.remove('gradient-fade-left');
-                }, 200);
+                }, 400);
             }
 
             // Find the first pill that's currently fully visible
@@ -157,14 +172,14 @@ const CollectionCarousel: React.FC<CollectionCarouselProps> = ({
 
             carouselRef.current.scrollTo({ left: targetScroll, behavior: 'smooth' });
 
-            // Manually trigger scroll check after a short delay to ensure state updates
+            // Manually trigger scroll check after smooth scroll completes
             setTimeout(() => {
                 if (carouselRef.current && isDesktop) {
                     const { scrollLeft, scrollWidth, clientWidth } = carouselRef.current;
                     setCanScrollLeft(scrollLeft > 0);
                     setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
                 }
-            }, 150);
+            }, 400);
         }
     };
 
@@ -177,9 +192,10 @@ const CollectionCarousel: React.FC<CollectionCarouselProps> = ({
             // Slide out right gradient (only if visible)
             if (containerRef.current && canScrollRight) {
                 containerRef.current.classList.add('gradient-fade-right');
+                // Remove after smooth scroll completes (400ms)
                 setTimeout(() => {
                     containerRef.current?.classList.remove('gradient-fade-right');
-                }, 200);
+                }, 400);
             }
 
             // Find first pill that's not fully visible
@@ -193,14 +209,14 @@ const CollectionCarousel: React.FC<CollectionCarouselProps> = ({
                     const targetScroll = pillLeft - 20; // 20px padding
                     carouselRef.current.scrollTo({ left: targetScroll, behavior: 'smooth' });
 
-                    // Manually trigger scroll check after a short delay to ensure state updates
+                    // Manually trigger scroll check after smooth scroll completes
                     setTimeout(() => {
                         if (carouselRef.current && isDesktop) {
                             const { scrollLeft, scrollWidth, clientWidth } = carouselRef.current;
                             setCanScrollLeft(scrollLeft > 0);
                             setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
                         }
-                    }, 100);
+                    }, 400);
                     return;
                 }
             }
@@ -208,14 +224,14 @@ const CollectionCarousel: React.FC<CollectionCarouselProps> = ({
             // If we're here, scroll to the end
             carouselRef.current.scrollTo({ left: carouselRef.current.scrollWidth, behavior: 'smooth' });
 
-            // Manually trigger scroll check after a short delay to ensure state updates
+            // Manually trigger scroll check after smooth scroll completes
             setTimeout(() => {
                 if (carouselRef.current && isDesktop) {
                     const { scrollLeft, scrollWidth, clientWidth } = carouselRef.current;
                     setCanScrollLeft(scrollLeft > 0);
                     setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
                 }
-            }, 100);
+            }, 400);
         }
     };
 

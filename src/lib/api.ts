@@ -106,7 +106,11 @@ class ApiClient {
       ...(lighterType && { lighter_type: lighterType.toString() }),
       ...(category && { category: category.toString() }),
     });
-    return this.request(`/products/?${params}`);
+    console.log('[API] getProducts called with:', { page, pageSize, lighterType, category, params: params.toString() });
+    console.log('[API] About to call request with endpoint:', `/products/?${params}`);
+    const result = await this.request(`/products/?${params}`);
+    console.log('[API] Request completed, result:', result);
+    return result;
   }
 
   async getBatchProducts(ids: string[]): Promise<{

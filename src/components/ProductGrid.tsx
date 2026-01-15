@@ -22,8 +22,6 @@ const ProductGrid = ({ isAboutSectionVisible }: { isAboutSectionVisible: boolean
 
   // Handle size filter changes
   const handleSizeChange = (size: string) => {
-    setActiveSize(size);
-
     // Convert size to lighterType parameter
     let lighterType: number | undefined;
     if (size === 'classic') {
@@ -31,6 +29,15 @@ const ProductGrid = ({ isAboutSectionVisible }: { isAboutSectionVisible: boolean
     } else if (size === 'mini') {
       lighterType = 2; // Mini BIC
     }
+
+    // Check if this is actually a change
+    if (lighterType === activeLighterType) {
+      console.log('[ProductGrid] Size unchanged, skipping reset');
+      setActiveSize(size); // Still update UI
+      return;
+    }
+
+    setActiveSize(size);
 
     // Always scroll to top of collection when size changes
     requestAnimationFrame(() => {
@@ -58,6 +65,16 @@ const ProductGrid = ({ isAboutSectionVisible }: { isAboutSectionVisible: boolean
 
   // Handle collection/category changes
   const handleCollectionChange = (collectionSlug: string, categoryId?: number) => {
+    console.log('[ProductGrid] handleCollectionChange called:', { collectionSlug, categoryId, activeLighterType, activeCategory });
+
+    // Check if this is actually a change
+    if (categoryId === activeCategory) {
+      console.log('[ProductGrid] Category unchanged, skipping reset');
+      // Still update the collectionSlug state for UI highlighting
+      setActiveCollection(collectionSlug);
+      return;
+    }
+
     // Wait for DOM to settle (products may be loading)
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -79,11 +96,12 @@ const ProductGrid = ({ isAboutSectionVisible }: { isAboutSectionVisible: boolean
     });
 
     setActiveCollection(collectionSlug);
-    if (categoryId) {
-      setActiveCategory(categoryId);
-    } else {
-      setActiveCategory(undefined);
-    }
+
+    // When "All Collections" is selected (categoryId is undefined), clear the category filter
+    // Otherwise, set the category filter
+    // The size filter (activeLighterType) is preserved and works together with category
+    setActiveCategory(categoryId);
+
     // Reset to page 1 and clear existing products when category changes
     setPage(1);
     setProducts([]);

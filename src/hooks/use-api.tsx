@@ -36,6 +36,19 @@ export const useProducts = () => {
   const [filteredCount, setFilteredCount] = useState(0);
   const [activeLighterType, setActiveLighterType] = useState<number | undefined>(undefined);
   const [activeCategory, setActiveCategory] = useState<number | undefined>(undefined);
+  const activeCategoryRef = useRef(activeCategory);
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    activeCategoryRef.current = activeCategory;
+  }, [activeCategory]);
+
+  // Temporary placeholder - will be replaced after loadMoreProducts is defined
+  let setActiveCategoryWithLog: ((category: number | undefined) => void) = useCallback((category: number | undefined) => {
+    console.log('[useProducts] setActiveCategory called (before init):', category);
+    setActiveCategory(category);
+  }, []);
+
   const [initialLoadComplete, setInitialLoadComplete] = useState(false); // State to trigger observer setup
 
   const disableObserver = useCallback(() => {
@@ -123,12 +136,14 @@ export const useProducts = () => {
   }, []);
 
   const loadMoreProducts = useCallback(async (pageNum: number = 1, lighterType?: number, category?: number) => {
-    log(`📥 loadMoreProducts called - page: ${pageNum}, lighterType: ${lighterType}, category: ${category}, scrollY: ${window.scrollY}, isLoadingRef: ${isLoadingRef.current}`);
+    console.log('[useProducts] loadMoreProducts called:', { pageNum, lighterType, category, scrollY: window.scrollY, isLoadingRef: isLoadingRef.current });
+    console.log('[useProducts] Current activeLighterType state:', activeLighterType);
+    console.log('[useProducts] Current activeCategory state:', activeCategory);
 
     // Prevent concurrent loads - if we're already loading, skip this request
     // Exception: page 1 always takes priority (filter change)
     if (isLoadingRef.current && pageNum !== 1) {
-      log(`⚠️ Skipping load - already loading (page ${pageNum})`);
+      console.log('[useProducts] ⚠️ Skipping load - already loading (page)', pageNum);
       return;
     }
 
@@ -189,6 +204,13 @@ export const useProducts = () => {
       setHasMore(response.next !== null);
       setError(null);
 
+      // Now that products are added, clear loading state
+      // This must happen AFTER setProducts to prevent "No Lighters Found" flash
+      log(`📥 Products added, clearing loading state`);
+      setLoading(false);
+      setLoadingMore(false);
+      isLoadingRef.current = false;
+
       // Log scroll position after state update (using setTimeout to get post-render value)
       setTimeout(() => {
         log(`✅ Products added, scrollY after render: ${window.scrollY}`);
@@ -208,23 +230,37 @@ export const useProducts = () => {
         console.error('Error fetching products:', err);
       }
       setShowSkeletons(false);
-    } finally {
-      log(`📥 loadMoreProducts complete - setting loading=false, loadingMore=false`);
+      // Clear loading state on error too
       setLoading(false);
       setLoadingMore(false);
       isLoadingRef.current = false;
     }
   }, []);
 
+  // Redefine the wrapper with proper implementation after loadMoreProducts is defined
+  setActiveCategoryWithLog = useCallback((category: number | undefined) => {
+    const previousCategory = activeCategoryRef.current;
+    console.log('[useProducts] setActiveCategory called with:', category, 'previous value:', previousCategory);
+
+    // If clicking the same category, do nothing (prevent unnecessary refreshes)
+    if (category === previousCategory) {
+      console.log('[useProducts] Same category selected, skipping refresh');
+      return;
+    }
+
+    setActiveCategory(category);
+  }, [activeLighterType, loadMoreProducts]);
+
   useEffect(() => {
+    console.log('[useProducts] useEffect triggered - calling loadMoreProducts with:', { page: 1, activeLighterType, activeCategory });
     loadMoreProducts(1, activeLighterType, activeCategory);
-  }, [loadMoreProducts, activeLighterType, activeCategory]);
+  }, [activeLighterType, activeCategory]);
 
   useEffect(() => {
     if (page > 1) {
       loadMoreProducts(page, activeLighterType, activeCategory);
     }
-  }, [page, loadMoreProducts, activeLighterType, activeCategory]);
+  }, [page, activeLighterType, activeCategory]);
 
   // Update skeleton count when products change and we're loading more
   useEffect(() => {
@@ -440,7 +476,7 @@ export const useProducts = () => {
     activeLighterType,
     setActiveLighterType,
     activeCategory,
-    setActiveCategory,
+    setActiveCategory: setActiveCategoryWithLog,
     setPage,
     setProducts,
     setHasMore,

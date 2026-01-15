@@ -671,7 +671,7 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 200ms ease-out;
+    transition: opacity 0.3s ease-out, background 200ms ease-out, color 200ms ease-out, transform 0.1s ease-out;
     z-index: 100;
     /* Maximum z-index with isolation */
     isolation: isolate;
@@ -694,8 +694,24 @@
     left: 0.5rem;
   }
 
+  /* Left chevron fades out when gradient-fade-left is active */
+  .collection-carousel-container.gradient-fade-left .collection-chevron-left {
+    opacity: 0;
+    transform: translateX(-10px) translateY(-50%);
+    pointer-events: none;
+    transition: opacity 0.25s ease-out, transform 0.25s ease-out, background 200ms ease-out, color 200ms ease-out;
+  }
+
   .collection-chevron-right {
     right: 0.5rem;
+  }
+
+  /* Right chevron fades out when gradient-fade-right is active */
+  .collection-carousel-container.gradient-fade-right .collection-chevron-right {
+    opacity: 0;
+    transform: translateX(10px) translateY(-50%);
+    pointer-events: none;
+    transition: opacity 0.25s ease-out, transform 0.25s ease-out, background 200ms ease-out, color 200ms ease-out;
   }
 
   /* Adjust wrapper when chevrons are present */
@@ -711,54 +727,56 @@
     content: '';
     display: block;
     position: absolute;
-    top: 50%;
-    left: 0;
-    transform: translateY(-50%);
-    height: 44px;
-    width: 120px;
+    top: -10px;
+    left: -10px;
+    height: calc(100% + 20px);
+    width: 160px;
     background: linear-gradient(90deg,
         rgb(var(--product-bg)) 0%,
-        rgb(var(--product-bg)) 40%,
+        rgb(var(--product-bg)) 60%,
         transparent 100%);
-    z-index: 2;
+    z-index: 5;
     pointer-events: none;
     opacity: 0;
-    transition: opacity 0.15s ease;
+    transition: opacity 0.3s ease-out;
   }
 
   .collection-carousel-container.has-chevrons.can-scroll-left::before {
     opacity: 1;
+    transition-delay: 0ms;
   }
 
   .collection-carousel-container.has-chevrons.can-scroll-left.gradient-fade-left::before {
     opacity: 0;
+    transition-delay: 0ms;
   }
 
   .collection-carousel-container.has-chevrons::after {
     content: '';
     display: block;
     position: absolute;
-    top: 50%;
-    right: 0;
-    transform: translateY(-50%);
-    height: 44px;
-    width: 120px;
+    top: -10px;
+    right: -10px;
+    height: calc(100% + 20px);
+    width: 160px;
     background: linear-gradient(-90deg,
         rgb(var(--product-bg)) 0%,
-        rgb(var(--product-bg)) 40%,
+        rgb(var(--product-bg)) 60%,
         transparent 100%);
-    z-index: 2;
+    z-index: 5;
     pointer-events: none;
     opacity: 0;
-    transition: opacity 0.15s ease;
+    transition: opacity 0.3s ease-out;
   }
 
   .collection-carousel-container.has-chevrons.can-scroll-right::after {
     opacity: 1;
+    transition-delay: 0ms;
   }
 
   .collection-carousel-container.has-chevrons.can-scroll-right.gradient-fade-right::after {
     opacity: 0;
+    transition-delay: 0ms;
   }
 
 
