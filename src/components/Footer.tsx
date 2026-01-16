@@ -53,7 +53,7 @@ const Footer = () => {
                 </a>
               </li>
               <li>
-                <a href="#" className="text-cream/80 hover:text-cream transition-colors">
+                <a href="#about" className="text-cream/80 hover:text-cream transition-colors">
                   Our Story
                 </a>
               </li>
@@ -89,7 +89,10 @@ const Footer = () => {
         <div className="mt-12 pt-8 border-t border-cream/20">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="font-body text-sm text-cream/60">
-              © {new Date().getFullYear()} Spirit Beads. All rights reserved.
+              © {new Date().getFullYear()} Spirit Beads. All rights reserved. Operated by{" "}
+              <a href="https://thebeadedcase.com" className="text-cream/80 hover:text-cream transition-colors">
+                thebeadedcase.com
+              </a>
             </p>
             <p className="font-body text-sm text-cream/60">
               Made with ❤️ on Native Land
