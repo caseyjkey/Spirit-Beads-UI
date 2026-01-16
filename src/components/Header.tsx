@@ -65,13 +65,40 @@ const Header = () => {
         return;
       }
 
+      let lastScrollY = window.scrollY;
+      let scrollListenerAdded = false;
+
+      // Abort verification if user manually scrolls UP (away from target)
+      const handleManualScroll = () => {
+        if (scrollingToRef.current !== sectionId) return;
+
+        const currentScrollY = window.scrollY;
+        // If user scrolled UP (scrollY decreased), cancel the verification
+        if (currentScrollY < lastScrollY) {
+          scrollingToRef.current = null;
+          window.removeEventListener('scroll', handleManualScroll);
+          scrollListenerAdded = false;
+        }
+        lastScrollY = currentScrollY;
+      };
+
       const scrollToTarget = (attemptCount = 0) => {
         // Abort if user clicked a different nav item
-        if (scrollingToRef.current !== sectionId) return;
+        if (scrollingToRef.current !== sectionId) {
+          if (scrollListenerAdded) {
+            window.removeEventListener('scroll', handleManualScroll);
+            scrollListenerAdded = false;
+          }
+          return;
+        }
 
         // Max 5 attempts to prevent infinite loop
         if (attemptCount > 5) {
           scrollingToRef.current = null;
+          if (scrollListenerAdded) {
+            window.removeEventListener('scroll', handleManualScroll);
+            scrollListenerAdded = false;
+          }
           return;
         }
 
@@ -83,7 +110,18 @@ const Header = () => {
         const currentOffset = Math.abs(rect.top - headerHeight);
         if (currentOffset < 5) {
           scrollingToRef.current = null;
+          if (scrollListenerAdded) {
+            window.removeEventListener('scroll', handleManualScroll);
+            scrollListenerAdded = false;
+          }
           return; // We've arrived
+        }
+
+        // Add scroll listener on first attempt only
+        if (attemptCount === 0 && !scrollListenerAdded) {
+          window.addEventListener('scroll', handleManualScroll, { passive: true });
+          scrollListenerAdded = true;
+          lastScrollY = window.scrollY;
         }
 
         window.scrollTo({ top: targetPosition, behavior: 'smooth' });
@@ -91,7 +129,13 @@ const Header = () => {
         // Verify we reach target after scroll animation completes
         // If page height changed during scroll (products loaded), scroll again
         setTimeout(() => {
-          if (scrollingToRef.current !== sectionId) return;
+          if (scrollingToRef.current !== sectionId) {
+            if (scrollListenerAdded) {
+              window.removeEventListener('scroll', handleManualScroll);
+              scrollListenerAdded = false;
+            }
+            return;
+          }
 
           const newRect = target.getBoundingClientRect();
           const newOffset = Math.abs(newRect.top - headerHeight);
@@ -101,6 +145,10 @@ const Header = () => {
             scrollToTarget(attemptCount + 1);
           } else {
             scrollingToRef.current = null;
+            if (scrollListenerAdded) {
+              window.removeEventListener('scroll', handleManualScroll);
+              scrollListenerAdded = false;
+            }
           }
         }, 600); // Check after smooth scroll settles (~500-600ms)
       };

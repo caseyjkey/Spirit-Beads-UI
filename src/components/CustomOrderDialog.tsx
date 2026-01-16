@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Upload, X, Loader2, Palette } from "lucide-react";
+import { getApiBaseUrl } from "@/lib/api";
 import {
   Dialog,
   DialogContent,
@@ -24,8 +25,9 @@ import {
 } from "@/components/ui/form";
 import { toast } from "sonner";
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+const MAX_FILE_SIZE = 7 * 1024 * 1024; // 7MB
+const MAX_FILES = 10;
+const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
 
 const customOrderSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100, "Name must be less than 100 characters"),
@@ -41,8 +43,16 @@ interface UploadedFile {
   preview: string;
 }
 
-const CustomOrderDialog = () => {
-  const [open, setOpen] = useState(false);
+interface CustomOrderDialogProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  trigger?: React.ReactNode;
+}
+
+const CustomOrderDialog = ({ open: controlledOpen, onOpenChange: controlledOnOpenChange, trigger }: CustomOrderDialogProps) => {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen ?? internalOpen;
+  const setOpen = controlledOnOpenChange ?? setInternalOpen;
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -64,18 +74,18 @@ const CustomOrderDialog = () => {
     const newFiles: UploadedFile[] = [];
 
     Array.from(selectedFiles).forEach((file) => {
-      if (files.length + newFiles.length >= 5) {
-        toast.error("Maximum 5 images allowed");
+      if (files.length + newFiles.length >= MAX_FILES) {
+        toast.error(`Maximum ${MAX_FILES} images allowed`);
         return;
       }
 
       if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
-        toast.error(`${file.name} is not a supported image type`);
+        toast.error(`${file.name} is not a supported image type (JPEG, PNG, WEBP, GIF)`);
         return;
       }
 
       if (file.size > MAX_FILE_SIZE) {
-        toast.error(`${file.name} is too large. Max size is 5MB`);
+        toast.error(`${file.name} is too large. Max size is 7MB`);
         return;
       }
 
@@ -105,31 +115,66 @@ const CustomOrderDialog = () => {
   const onSubmit = async (data: CustomOrderFormData) => {
     setIsSubmitting(true);
 
-    // TODO: Implement backend submission with Lovable Cloud
-    console.log("Form data:", data);
-    console.log("Files:", files.map(f => f.file.name));
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      // Create FormData for multipart upload
+      const formData = new FormData();
 
-    toast.success("Custom order request submitted! We'll be in touch soon.");
-    
-    // Reset form and files
-    form.reset();
-    files.forEach(({ preview }) => URL.revokeObjectURL(preview));
-    setFiles([]);
-    setOpen(false);
-    setIsSubmitting(false);
+      // Append text fields
+      formData.append('name', data.name);
+      formData.append('email', data.email);
+      formData.append('description', data.description);
+      if (data.colors) {
+        formData.append('colors', data.colors);
+      }
+
+      // Append actual file objects (NOT preview URLs)
+      files.forEach(({ file }) => {
+        formData.append('images', file);
+      });
+
+      // Submit - NO Content-Type header (browser sets multipart boundary)
+      const response = await fetch(`${getApiBaseUrl()}/custom-orders/`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to submit request');
+      }
+
+      const result = await response.json();
+      console.log("Custom order request submitted:", result);
+
+      toast.success("Custom order request submitted! We'll be in touch soon.");
+
+      // Reset form and files
+      form.reset();
+      files.forEach(({ preview }) => URL.revokeObjectURL(preview));
+      setFiles([]);
+      setOpen(false);
+    } catch (error) {
+      console.error("Error submitting custom order request:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to submit request. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="gap-2">
-          <Palette className="w-4 h-4" />
-          Request Custom Order
-        </Button>
-      </DialogTrigger>
+      {trigger ? (
+        <DialogTrigger asChild>
+          {trigger}
+        </DialogTrigger>
+      ) : (
+        <DialogTrigger asChild>
+          <Button variant="outline" className="gap-2">
+            <Palette className="w-4 h-4" />
+            Request Custom Order
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-display text-2xl">Request a Custom Order</DialogTitle>
@@ -204,7 +249,7 @@ const CustomOrderDialog = () => {
             <div className="space-y-2">
               <label className="text-sm font-medium">Reference Images (optional)</label>
               <p className="text-xs text-muted-foreground">
-                Upload up to 5 images for inspiration. Max 5MB each.
+                Upload up to {MAX_FILES} images for inspiration. Max 7MB each.
               </p>
 
               {/* Upload Button */}
@@ -217,7 +262,7 @@ const CustomOrderDialog = () => {
                   Click to upload or drag & drop
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  PNG, JPG, WEBP up to 5MB
+                  PNG, JPG, WEBP, GIF up to 7MB
                 </p>
               </div>
 

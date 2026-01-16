@@ -1,4 +1,5 @@
-import { Mail, Instagram, Facebook } from "lucide-react";
+import { Mail } from "lucide-react";
+import CustomOrderDialog from "./CustomOrderDialog";
 
 const Footer = () => {
   return (
@@ -14,6 +15,7 @@ const Footer = () => {
               the spirit of its maker.
             </p>
             <div className="flex gap-4">
+              {/* Instagram icon commented out
               <a
                 href="#"
                 className="w-10 h-10 rounded-full bg-cream/10 flex items-center justify-center hover:bg-cream/20 transition-colors"
@@ -21,6 +23,8 @@ const Footer = () => {
               >
                 <Instagram className="w-5 h-5" />
               </a>
+              */}
+              {/* Facebook icon commented out
               <a
                 href="#"
                 className="w-10 h-10 rounded-full bg-cream/10 flex items-center justify-center hover:bg-cream/20 transition-colors"
@@ -28,6 +32,7 @@ const Footer = () => {
               >
                 <Facebook className="w-5 h-5" />
               </a>
+              */}
               <a
                 href="mailto:hello@sacredbeads.com"
                 className="w-10 h-10 rounded-full bg-cream/10 flex items-center justify-center hover:bg-cream/20 transition-colors"
@@ -48,20 +53,24 @@ const Footer = () => {
                 </a>
               </li>
               <li>
-                <a href="#about" className="text-cream/80 hover:text-cream transition-colors">
+                <a href="#" className="text-cream/80 hover:text-cream transition-colors">
                   Our Story
                 </a>
               </li>
               <li>
-                <a href="#" className="text-cream/80 hover:text-cream transition-colors">
-                  Custom Orders
-                </a>
+                <CustomOrderDialog trigger={
+                  <a className="text-cream/80 hover:text-cream transition-colors cursor-pointer">
+                    Custom Orders
+                  </a>
+                } />
               </li>
+              {/* Care Instructions link commented out
               <li>
                 <a href="#" className="text-cream/80 hover:text-cream transition-colors">
                   Care Instructions
                 </a>
               </li>
+              */}
             </ul>
           </div>
 
