@@ -1,17 +1,14 @@
-// Production API URL
-const PROD_API_URL = 'https://spirit-beads.keycasey.com/api';
-
 /**
  * Determines the API base URL based on environment:
- * - Production build: Uses production URL
+ * - Production build: Uses relative URL (/api) - works with any domain
  * - Development on localhost: Uses localhost:8000
  * - Development on Tailscale IP (100.82.23.47): Uses same IP with port 8000
  */
 export const getApiBaseUrl = (): string => {
-  
-  // Production build always uses the production URL
+
+  // Production build uses relative URL to work with any domain
   if (import.meta.env.PROD) {
-    return PROD_API_URL;
+    return '/api';
   }
 
   // Development: detect where the user is browsing from
