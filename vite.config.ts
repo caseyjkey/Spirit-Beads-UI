@@ -8,7 +8,10 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "0.0.0.0",
     port: 8080,
-    allowedHosts: ["100.82.23.47", "spirit-beads.keycasey.com"],
+    allowedHosts: ["100.82.23.47", "spirit-beads.keycasey.com", "thebeadedcase.com", "www.thebeadedcase.com"],
+  },
+  preview: {
+    allowedHosts: ["100.82.23.47", "spirit-beads.keycasey.com", "thebeadedcase.com", "www.thebeadedcase.com"],
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
