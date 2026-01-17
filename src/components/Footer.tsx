@@ -34,7 +34,7 @@ const Footer = () => {
               </a>
               */}
               <a
-                href="mailto:hello@sacredbeads.com"
+                href="mailto:lynn.braveheart@thebeadedcase.com"
                 className="w-10 h-10 rounded-full bg-cream/10 flex items-center justify-center hover:bg-cream/20 transition-colors"
                 aria-label="Email"
               >
@@ -78,7 +78,7 @@ const Footer = () => {
           <div>
             <h4 className="font-display text-lg font-medium mb-4">Get in Touch</h4>
             <ul className="space-y-3 font-body text-cream/80">
-              <li>lynnbraveheart07@gmail.com</li>
+              <li>lynn.braveheart@thebeadedcase.com</li>
               <li>Custom orders welcome</li>
               <li>Ships from the Midwest</li>
             </ul>
