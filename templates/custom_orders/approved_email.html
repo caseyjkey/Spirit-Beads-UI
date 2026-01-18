@@ -81,11 +81,26 @@
     }
     
     .highlight-box {
-      background: linear-gradient(135deg, #2596BE10 0%, #2596BE08 100%);
+      background-color: #FEFBF6;
       border-left: 4px solid #2596BE;
       border-radius: 0 8px 8px 0;
       padding: 20px 24px;
       margin: 24px 0;
+    }
+    
+    .product-image-container {
+      background-color: #FEFBF6;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    
+    .product-image {
+      max-width: 100%;
+      max-height: 200px;
+      height: auto;
+      border-radius: 4px;
     }
     
     .highlight-title {
@@ -254,6 +269,13 @@
         
         <!-- Request Details -->
         <div class="highlight-box">
+          {% if reference_images %}
+          <div class="product-image-container">
+            {% for image in reference_images %}
+            <img src="{{ image }}" alt="Reference image" class="product-image" style="margin: 4px;" />
+            {% endfor %}
+          </div>
+          {% endif %}
           <p class="highlight-title">Your Request</p>
           <p class="highlight-text">{{ description }}</p>
           {% if colors %}
