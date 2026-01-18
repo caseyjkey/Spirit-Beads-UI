@@ -23,6 +23,7 @@ const AppContent = () => {
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/success" element={<Success />} />
+          <Route path="/custom-order-success" element={<Success />} />
           <Route path="/cancel" element={<Cancel />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
