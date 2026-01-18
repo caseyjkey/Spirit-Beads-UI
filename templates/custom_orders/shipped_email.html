@@ -147,11 +147,26 @@
     }
     
     .highlight-box {
-      background: linear-gradient(135deg, #B85A2B10 0%, #B85A2B08 100%);
+      background-color: #FEFBF6;
       border-left: 4px solid #B85A2B;
       border-radius: 0 8px 8px 0;
       padding: 20px 24px;
       margin: 24px 0;
+    }
+    
+    .product-image-container {
+      background-color: #FEFBF6;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    
+    .product-image {
+      max-width: 100%;
+      max-height: 200px;
+      height: auto;
+      border-radius: 4px;
     }
     
     .highlight-title {
@@ -353,6 +368,11 @@
         
         <!-- Order Details -->
         <div class="highlight-box">
+          {% if product_image %}
+          <div class="product-image-container">
+            <img src="{{ product_image }}" alt="Your custom piece" class="product-image" />
+          </div>
+          {% endif %}
           <p class="highlight-title">Your Custom Piece</p>
           <p class="highlight-text">{{ description }}</p>
           {% if colors %}

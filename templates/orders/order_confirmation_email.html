@@ -136,10 +136,24 @@
     }
     
     .order-item {
-      background: linear-gradient(135deg, #F5F2ED 0%, #EBE7E0 100%);
+      background-color: #FEFBF6;
       border-radius: 12px;
       padding: 20px;
       margin: 16px 0;
+    }
+    
+    .product-image-container {
+      background-color: #FEFBF6;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    
+    .product-image {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
     }
     
     .item-name {
@@ -388,6 +402,11 @@
         <h3 class="section-title">Order Details</h3>
         {% for item in order_items %}
         <div class="order-item">
+          {% if item.image %}
+          <div class="product-image-container">
+            <img src="{{ item.image }}" alt="{{ item.name }}" class="product-image" />
+          </div>
+          {% endif %}
           <h4 class="item-name">{{ item.name }}</h4>
           <div class="item-details">
             <span class="item-detail"><strong>Collection:</strong> {{ item.collection }}</span>
