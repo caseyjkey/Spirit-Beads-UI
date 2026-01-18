@@ -105,7 +105,12 @@ class ApiClient {
     });
     console.log('[API] getProducts called with:', { page, pageSize, lighterType, category, params: params.toString() });
     console.log('[API] About to call request with endpoint:', `/products/?${params}`);
-    const result = await this.request(`/products/?${params}`);
+    const result = await this.request(`/products/?${params}`) as {
+      results: Product[];
+      count: number;
+      next: string | null;
+      previous: string | null;
+    };
     console.log('[API] Request completed, result:', result);
     return result;
   }

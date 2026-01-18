@@ -541,8 +541,8 @@ export const useCategories = () => {
         setLoading(true);
         const data = await apiClient.getCategories();
         // Extract the results array from paginated response
-        const categoriesArray = data.results || data;
-        setCategories(categoriesArray);
+        const categoriesArray = Array.isArray(data) ? data : (data.results || []);
+        setCategories(categoriesArray as Category[]);
         setError(null);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch categories');
