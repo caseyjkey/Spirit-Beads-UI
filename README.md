@@ -69,11 +69,7 @@ The project's `component-architecture` is one of its key strengths. It follows a
 ### Styling & Responsive Design
 The `ecommerce-frontend` is styled using **Tailwind CSS**, a utility-first CSS framework that enables rapid development of a custom `responsive-design`. The configuration in `tailwind.config.ts` defines a custom theme, including colors and fonts, that aligns with the brand's identity. This setup, combined with `shadcn/ui`'s components, creates a powerful and flexible `design-system`.
 ## 📚 Related Projects
-- **[spirit-beads-backend](https://github.com/caseyjkey/spirit-beads-backend)** - Live at thebeadedcase.com
+
+- **[spirit-beads-backend](https://github.com/caseyjkey/spirit-beads-backend)** - Django e-commerce backend (live at thebeadedcase.com)
 - **[spirit-beads-service](https://github.com/caseyjkey/spirit-beads-service)** - Service layer architecture
-
-
-## Related Projects
-
-- **[spirit-beads-backend](https://github.com/caseyjkey/spirit-beads-backend)** - Live at thebeadedcase.com
-- **[spirit-beads-service](https://github.com/caseyjkey/spirit-beads-service)** - Service layer architecture
+- **[lighter-splitter](https://github.com/caseyjkey/lighter-splitter)** - Spirit Beads ecosystem - image processing pipeline
