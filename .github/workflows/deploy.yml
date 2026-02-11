@@ -1,0 +1,31 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Build & Deploy
+        run: |
+          export PATH=/home/ec2-user/.bun/bin:$PATH
+          cd /var/www/spirit-beads-ui
+
+          # Pull latest changes
+          echo "Pulling latest changes..."
+          git fetch origin
+          git reset --hard origin/main
+
+          # Install dependencies
+          echo "Installing dependencies..."
+          bun install --frozen-lockfile
+
+          # Build
+          echo "Building Vite app..."
+          bun run build
+
+          # Note: Caddy serves static files directly, no restart needed
+          echo "Deployment complete! Static files updated in /var/www/spirit-beads-ui/dist"
