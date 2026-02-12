@@ -71,3 +71,4 @@ The `ecommerce-frontend` is styled using **Tailwind CSS**, a utility-first CSS f
 
 - **[spirit-beads-service](https://github.com/caseyjkey/spirit-beads-service)** - Django e-commerce backend (service layer)
 - **[lighter-splitter](https://github.com/caseyjkey/lighter-splitter)** - Spirit Beads ecosystem - image processing pipeline
+
